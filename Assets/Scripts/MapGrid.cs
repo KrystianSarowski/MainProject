@@ -13,7 +13,7 @@ public class MapGrid : MonoBehaviour
     {
         m_map = new int[m_width, m_height];
 
-        if (m_map.GetLength(0) == 0 || m_map.GetLength(1) == 1)
+        if (m_map.GetLength(0) == 0 || m_map.GetLength(1) == 0)
         {
             Debug.Log("Warning One of the dimensions has a size of 0");
         }
