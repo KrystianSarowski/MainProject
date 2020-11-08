@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapGrid : MonoBehaviour
+public class TileGrid
 {
     public int m_height;
     public int m_width;
 
-    int[,] m_map;
+    Tile[,] m_map;
 
-    public void CreateMap()
+    public void CreateTileGrid()
     {
-        m_map = new int[m_width, m_height];
+        m_map = new Tile[m_width, m_height];
 
         if (m_map.GetLength(0) == 0 || m_map.GetLength(1) == 0)
         {
@@ -23,13 +23,13 @@ public class MapGrid : MonoBehaviour
             {
                 for (int y = 0; y < m_height; y++)
                 {
-                    m_map[x, y] = 1;
+                    m_map[x, y] = new Tile();
                 }
             }
         }
     }
 
-    public int GetTile(int t_xIndex, int t_yIndex)
+    public Tile GetTile(int t_xIndex, int t_yIndex)
     {
         if(m_map != null)
         {
@@ -38,11 +38,17 @@ public class MapGrid : MonoBehaviour
                 return m_map[t_xIndex, t_yIndex];
             }
         }
-        return -1;
+
+        return null;
     }
 
-    public void SetTile(int t_xIndex, int t_yIndex, int t_newTileValue)
+    public void SetTileType(int t_xIndex, int t_yIndex, TileType t_newTileValue)
     {
-        m_map[t_xIndex, t_yIndex] = t_newTileValue;
+        m_map[t_xIndex, t_yIndex].SetTileType(t_newTileValue);
+    }
+
+    public void SetTileOwner(int t_xIndex, int t_yIndex, int t_newOwnerID)
+    {
+        m_map[t_xIndex, t_yIndex].SetOwnerID(t_newOwnerID);
     }
 }

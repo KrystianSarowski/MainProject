@@ -121,6 +121,50 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &281097372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 281097374}
+  - component: {fileID: 281097373}
+  m_Layer: 0
+  m_Name: Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &281097373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281097372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51f01b480ea078c43bea57be6419d924, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_seed: D82D434
+--- !u!4 &281097374
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281097372}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 100, y: 100, z: 100}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &449206794
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,28 +175,13 @@ GameObject:
   m_Component:
   - component: {fileID: 449206797}
   - component: {fileID: 449206796}
-  - component: {fileID: 449206795}
   m_Layer: 0
-  m_Name: Manager
+  m_Name: Level Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &449206795
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 449206794}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0781331cc2a2a3e4eb424cedd003285a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_height: 100
-  m_width: 100
 --- !u!114 &449206796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,10 +194,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21d72415291451c4da6a69ab30b642d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_mapGrid: {fileID: 449206795}
-  m_roomPrefab: {fileID: 3390625845203370821, guid: 1d2c8576429a27c42939150c716c2f0d,
-    type: 3}
-  m_seed: Bob
+  m_levelWidth: 100
+  m_levelHight: 100
 --- !u!4 &449206797
 Transform:
   m_ObjectHideFlags: 0

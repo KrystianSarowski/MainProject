@@ -4,42 +4,48 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    public MapGrid m_mapGrid;
+    TileGrid m_mapGrid;
 
-    public GameObject m_roomPrefab;
-    GameObject[] m_rooms;
+    Room[] m_rooms;
 
-    int numOfRooms = 10;
+    int numOfRooms = 40;
+    public int m_levelWidth;
+    public int m_levelHight;
 
     //Start is called before the first frame update
     void Start()
     {
-        m_mapGrid.CreateMap();
+        m_mapGrid = new TileGrid();
+        m_mapGrid.m_width = m_levelWidth;
+        m_mapGrid.m_height = m_levelHight;
+        m_mapGrid.CreateTileGrid();
 
         if (m_mapGrid != null)
         {
-            m_rooms = new GameObject[numOfRooms];
+            m_rooms = new Room[numOfRooms];
 
             for(int i =0; i < numOfRooms; i++)
             {
-                m_rooms[i] = Instantiate(m_roomPrefab);
+                m_rooms[i] = new Room();
+                m_rooms[i].SetRoomID(i);
+                m_rooms[i].GenerateRoom();
             }
 
-            PlaceRooms();
+            StartCoroutine("PlaceRooms");
         }
     }
 
-    void PlaceRooms()
+    public IEnumerator PlaceRooms()
     {
-        int roomsPlaced = 0;
+        int roomIndex = 0;
         int safeLockCount = 0;
 
-        while (roomsPlaced < numOfRooms && safeLockCount < 400)
+        while (roomIndex < numOfRooms && safeLockCount < 400)
         {
             Pair<int, int> mapPos = new Pair<int, int>(GameplayMananger.s_seedRandom.Next(0, m_mapGrid.m_width),
                GameplayMananger.s_seedRandom.Next(0, m_mapGrid.m_height));
 
-            MapGrid roomGrid = m_rooms[roomsPlaced].GetComponent<MapGrid>();
+            TileGrid roomGrid = m_rooms[roomIndex].m_roomGrid;
 
             if (ValidateRoomPlacement(mapPos.m_first, mapPos.m_second, roomGrid.m_width, roomGrid.m_height))
             {
@@ -47,16 +53,19 @@ public class LevelManager : MonoBehaviour
                 {
                     for (int y = 0; y < roomGrid.m_height; y++)
                     {
-                        m_mapGrid.SetTile(mapPos.m_first + x,
-                            mapPos.m_second + y,
-                            roomGrid.GetTile(x, y));
+                        int posOnMapX = mapPos.m_first + x;
+                        int posOnMapY = mapPos.m_second + y;
+
+                        m_mapGrid.SetTileType(posOnMapX, posOnMapY, roomGrid.GetTile(x, y).GetTileType());
+                        m_mapGrid.GetTile(posOnMapX, posOnMapY).SetOwnerID(m_rooms[roomIndex].GetRoomID());
                     }
                 }
-                roomsPlaced++;
+                roomIndex++;
             }
-
+            yield return new WaitForSeconds(0.001f);
             safeLockCount++;
         }
+        yield return new WaitForSeconds(0.01f);
     }
 
     bool ValidateRoomPlacement(int t_xIndex, int t_yIndex, int t_roomWidth, int t_roomHeight)
@@ -75,7 +84,7 @@ public class LevelManager : MonoBehaviour
                     canBePlaced = false;
                     return canBePlaced;
                 }
-                else if(m_mapGrid.GetTile(t_xIndex + x, t_yIndex + y) == 0)
+                else if(m_mapGrid.GetTile(t_xIndex + x, t_yIndex + y).GetOwnerID() != -1)
                 {
                     canBePlaced = false;
                     return canBePlaced;
@@ -94,7 +103,21 @@ public class LevelManager : MonoBehaviour
             {
                 for (int y = 0; y < m_mapGrid.m_height; y++)
                 {
-                    Gizmos.color = (m_mapGrid.GetTile(x, y) == 1) ? Color.black : Color.white;
+                    switch(m_mapGrid.GetTile(x,y).GetTileType())
+                    {
+                        case TileType.Empty:
+                            Gizmos.color = Color.white; 
+                            break;
+                        case TileType.Node:
+                            Gizmos.color = Color.red;
+                            break;
+                        case TileType.Wall:
+                            Gizmos.color = Color.black;
+                            break;
+                        default:
+                            break;
+                    }
+
                     Vector3 pos = new Vector3(-m_mapGrid.m_width / 2 + x + 0.5f, 0, -m_mapGrid.m_height / 2 + y + 0.5f);
                     Gizmos.DrawCube(pos, Vector3.one);
                 }

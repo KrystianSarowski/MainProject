@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room : MonoBehaviour
+public class Room
 {
-    public MapGrid m_roomGrid;
+    public TileGrid m_roomGrid;
 
-    private void Awake()
-    { 
+    int m_roomID = -1;
+
+    public void GenerateRoom()
+    {
+        m_roomGrid = new TileGrid();
+
         m_roomGrid.m_height = GameplayMananger.s_seedRandom.Next(5, 15);
         m_roomGrid.m_width = GameplayMananger.s_seedRandom.Next(5, 15);
 
-        m_roomGrid.CreateMap();
-        GenerateRoom();
-    }
-
-    void GenerateRoom()
-    {
+        m_roomGrid.CreateTileGrid();
         RandomFillRoom();
+
+        m_roomGrid.SetTileType(m_roomGrid.m_width / 2, m_roomGrid.m_height / 2, TileType.Node);
     }
 
     void RandomFillRoom()
@@ -28,13 +29,24 @@ public class Room : MonoBehaviour
             {
                 if (x == 0 || x == m_roomGrid.m_width - 1 || y == 0 || y == m_roomGrid.m_height - 1)
                 {
-                    m_roomGrid.SetTile(x, y, 1);
+                    m_roomGrid.SetTileType(x, y, TileType.Wall);
                 }
                 else
                 {
-                    m_roomGrid.SetTile(x, y, (GameplayMananger.s_seedRandom.Next(0, 100) < 45) ? 1 : 0);
+                    //m_roomGrid.SetTileType(x, y, (GameplayMananger.s_seedRandom.Next(0, 100) < 45) ? TileType.Wall : TileType.Empty);
+                    m_roomGrid.SetTileType(x, y, TileType.Empty);
                 }
             }
         }
+    }
+
+    public void SetRoomID(int t_newRoomID)
+    {
+        m_roomID = t_newRoomID;
+    }
+
+    public int GetRoomID()
+    {
+        return m_roomID;
     }
 }
