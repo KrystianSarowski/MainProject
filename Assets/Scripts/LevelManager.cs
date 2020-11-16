@@ -7,10 +7,13 @@ public class LevelManager : MonoBehaviour
     TileGrid m_mapGrid;
 
     Room[] m_rooms;
+    List<NodeArc> m_arcsMST = new List<NodeArc>();
 
-    int numOfRooms = 40;
+    int m_numOfRooms = 40;
     public int m_levelWidth;
     public int m_levelHight;
+
+    bool drawAllArcs = false;
 
     //Start is called before the first frame update
     void Start()
@@ -22,9 +25,9 @@ public class LevelManager : MonoBehaviour
 
         if (m_mapGrid != null)
         {
-            m_rooms = new Room[numOfRooms];
+            m_rooms = new Room[m_numOfRooms];
 
-            for(int i =0; i < numOfRooms; i++)
+            for(int i =0; i < m_numOfRooms; i++)
             {
                 m_rooms[i] = new Room();
                 m_rooms[i].SetRoomID(i);
@@ -35,37 +38,117 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if(drawAllArcs)
+            {
+                drawAllArcs = false;
+            }
+            else
+            {
+                drawAllArcs = true;
+            }
+        }
+    }
     public IEnumerator PlaceRooms()
     {
         int roomIndex = 0;
         int safeLockCount = 0;
 
-        while (roomIndex < numOfRooms && safeLockCount < 400)
+        while (roomIndex < m_numOfRooms && safeLockCount < 400)
         {
-            Pair<int, int> mapPos = new Pair<int, int>(GameplayMananger.s_seedRandom.Next(0, m_mapGrid.m_width),
+            Pair<int, int> position = new Pair<int, int>(GameplayMananger.s_seedRandom.Next(0, m_mapGrid.m_width),
                GameplayMananger.s_seedRandom.Next(0, m_mapGrid.m_height));
 
             TileGrid roomGrid = m_rooms[roomIndex].m_roomGrid;
 
-            if (ValidateRoomPlacement(mapPos.m_first, mapPos.m_second, roomGrid.m_width, roomGrid.m_height))
+            if (ValidateRoomPlacement(position.m_first, position.m_second, roomGrid.m_width, roomGrid.m_height))
             {
                 for (int x = 0; x < roomGrid.m_width; x++)
                 {
                     for (int y = 0; y < roomGrid.m_height; y++)
                     {
-                        int posOnMapX = mapPos.m_first + x;
-                        int posOnMapY = mapPos.m_second + y;
+                        int posOnMapX = position.m_first + x;
+                        int posOnMapY = position.m_second + y;
 
                         m_mapGrid.SetTileType(posOnMapX, posOnMapY, roomGrid.GetTile(x, y).GetTileType());
                         m_mapGrid.GetTile(posOnMapX, posOnMapY).SetOwnerID(m_rooms[roomIndex].GetRoomID());
                     }
                 }
+
+                m_rooms[roomIndex].SetPositionIndex(position);
                 roomIndex++;
+
+                yield return new WaitForSeconds(0.5f);
             }
-            yield return new WaitForSeconds(0.001f);
             safeLockCount++;
         }
+
+        //Temp Change Later
+        m_numOfRooms = roomIndex;
+        ConnectRooms();
+        m_arcsMST = PrimsAlgorithm.primMST(m_rooms, roomIndex);
+        Debug.Log("Count List:" + m_arcsMST.Count);
         yield return new WaitForSeconds(0.01f);
+    }
+
+    void ConnectRooms()
+    {
+        Debug.Log("Start");
+        int curRoomID = -1;
+        int prevRoomID = -1;
+
+        for (int x = 0; x < m_levelWidth; x++)
+        {
+            prevRoomID = -1;
+
+            for (int y = 0; y < m_levelHight; y++)
+            {
+                curRoomID = m_mapGrid.GetTile(x, y).GetOwnerID();
+
+                if (curRoomID != -1)
+                {
+                    if(prevRoomID == -1)
+                    {
+                        prevRoomID = curRoomID;
+                    }
+                    else if(prevRoomID != curRoomID)
+                    {
+                        m_rooms[prevRoomID].AddArc(m_rooms[curRoomID]);
+                        m_rooms[curRoomID].AddArc(m_rooms[prevRoomID]);
+                        prevRoomID = curRoomID;
+                    }
+                }
+            }
+        }
+
+        for (int y = 0; y < m_levelHight; y++)
+        {
+            prevRoomID = -1;
+
+            for (int x = 0; x < m_levelWidth; x++)
+            {
+                curRoomID = m_mapGrid.GetTile(x, y).GetOwnerID();
+
+                if (curRoomID != -1)
+                {
+                    if (prevRoomID == -1)
+                    {
+                        prevRoomID = curRoomID;
+                    }
+                    else if (prevRoomID != curRoomID)
+                    {
+                        m_rooms[prevRoomID].AddArc(m_rooms[curRoomID]);
+                        m_rooms[curRoomID].AddArc(m_rooms[prevRoomID]);
+                        prevRoomID = curRoomID;
+                    }
+                }
+            }
+        }
+
+        Debug.Log("Success");
     }
 
     bool ValidateRoomPlacement(int t_xIndex, int t_yIndex, int t_roomWidth, int t_roomHeight)
@@ -122,6 +205,61 @@ public class LevelManager : MonoBehaviour
                     Gizmos.DrawCube(pos, Vector3.one);
                 }
             }
+
+            if(m_arcsMST.Count != 0)
+            {
+                foreach (NodeArc arc in m_arcsMST)
+                {
+                    Pair<int, int> roomMapIndex = arc.GetStartRoom().GetNodePositonOnMap();
+                    Vector3 roomPos = new Vector3(
+                        -m_mapGrid.m_width / 2 + roomMapIndex.m_first + 0.5f,
+                        1,
+                        -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
+                        );
+
+                    Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
+                    Vector3 conRoomPos = new Vector3(
+                        -m_mapGrid.m_width / 2 + conRoomMapIndex.m_first + 0.5f,
+                        1,
+                        -m_mapGrid.m_height / 2 + conRoomMapIndex.m_second + 0.5f
+                        );
+
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawLine(conRoomPos, roomPos);
+                }
+            }
+
+
+            if (drawAllArcs)
+            {
+                foreach (Room room in m_rooms)
+                {
+                    if (room.GetPositionIndex() != null)
+                    {
+                        List<NodeArc> arcs = room.m_nodeArcs;
+
+                        Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
+                        Vector3 roomPos = new Vector3(
+                            -m_mapGrid.m_width / 2 + roomMapIndex.m_first + 0.5f,
+                            1,
+                            -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
+                            );
+
+                        foreach (NodeArc arc in arcs)
+                        {
+                            Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
+                            Vector3 conRoomPos = new Vector3(
+                                -m_mapGrid.m_width / 2 + conRoomMapIndex.m_first + 0.5f,
+                                1,
+                                -m_mapGrid.m_height / 2 + conRoomMapIndex.m_second + 0.5f
+                                );
+
+                            Gizmos.color = Color.blue;
+                            Gizmos.DrawLine(conRoomPos, roomPos);
+                        }
+                    }
+                }
+            }  
         }
     }
 }

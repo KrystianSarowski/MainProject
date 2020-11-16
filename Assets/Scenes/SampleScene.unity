@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51f01b480ea078c43bea57be6419d924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_seed: D82D434
+  m_seed: Ash
 --- !u!4 &281097374
 Transform:
   m_ObjectHideFlags: 0
