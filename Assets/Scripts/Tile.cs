@@ -6,7 +6,8 @@ public enum TileType
 {
     Node,
     Empty,
-    Wall
+    Wall,
+    Exit
 }
 
 public class Tile

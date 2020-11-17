@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
 
     Room[] m_rooms;
     List<NodeArc> m_arcsMST = new List<NodeArc>();
+    List<NodeArc> m_exitArcs = new List<NodeArc>();
 
     int m_numOfRooms = 40;
     public int m_levelWidth;
@@ -81,7 +82,7 @@ public class LevelManager : MonoBehaviour
                 m_rooms[roomIndex].SetPositionIndex(position);
                 roomIndex++;
 
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.1f);
             }
             safeLockCount++;
         }
@@ -91,7 +92,48 @@ public class LevelManager : MonoBehaviour
         ConnectRooms();
         m_arcsMST = PrimsAlgorithm.primMST(m_rooms, roomIndex);
         Debug.Log("Count List:" + m_arcsMST.Count);
+        createExitArcs();
         yield return new WaitForSeconds(0.01f);
+    }
+
+    void createExitArcs()
+    {
+        List<Pair<int, int>> possibleExits1;
+        List<Pair<int, int>> possibleExits2;
+
+        foreach(NodeArc arc in m_arcsMST)
+        {
+            NodeArc exitArc = arc;
+
+            possibleExits1 = arc.GetStartRoom().GetPossibleExitsOnMap();
+            possibleExits2 = arc.GetTargetRoom().GetPossibleExitsOnMap();
+
+            foreach(Pair<int,int> possibleExit1 in possibleExits1)
+            {
+                foreach (Pair<int, int> possibleExit2 in possibleExits2)
+                {
+                    if(exitArc.GetWeigtht() > NodeArc.CalculateWeight(possibleExit1, possibleExit2))
+                    {
+                        exitArc.SetStartPos(possibleExit1);
+                        exitArc.SetTargetPos(possibleExit2);
+                    }
+                }
+            }
+
+            exitArc.GetStartRoom().AddExitToRoom(exitArc.GetStartPos());
+            exitArc.GetTargetRoom().AddExitToRoom(exitArc.GetTargetPos());
+            m_exitArcs.Add(exitArc);
+        }
+
+        foreach(Room room in m_rooms)
+        {
+            List<Pair<int, int>> exitList = room.GetExitsOnMap();
+
+            foreach( Pair<int, int> exitIndex in exitList)
+            {
+                m_mapGrid.SetTileType(exitIndex.m_first, exitIndex.m_second, TileType.Exit);
+            }
+        }
     }
 
     void ConnectRooms()
@@ -197,6 +239,9 @@ public class LevelManager : MonoBehaviour
                         case TileType.Wall:
                             Gizmos.color = Color.black;
                             break;
+                        case TileType.Exit:
+                            Gizmos.color = Color.yellow;
+                            break;
                         default:
                             break;
                     }
@@ -208,16 +253,16 @@ public class LevelManager : MonoBehaviour
 
             if(m_arcsMST.Count != 0)
             {
-                foreach (NodeArc arc in m_arcsMST)
+                foreach (NodeArc arc in m_exitArcs)
                 {
-                    Pair<int, int> roomMapIndex = arc.GetStartRoom().GetNodePositonOnMap();
+                    Pair<int, int> roomMapIndex = arc.GetStartPos();
                     Vector3 roomPos = new Vector3(
                         -m_mapGrid.m_width / 2 + roomMapIndex.m_first + 0.5f,
                         1,
                         -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
                         );
 
-                    Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
+                    Pair<int, int> conRoomMapIndex = arc.GetTargetPos();
                     Vector3 conRoomPos = new Vector3(
                         -m_mapGrid.m_width / 2 + conRoomMapIndex.m_first + 0.5f,
                         1,
