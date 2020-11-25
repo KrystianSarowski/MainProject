@@ -7,7 +7,7 @@ using UnityEngine;
 public class Room
 {
     public TileGrid m_roomGrid;
-    public List<NodeArc> m_nodeArcs;
+    public List<TileArc> m_nodeArcs;
 
     int m_roomID = -1;
     public bool m_roomAdded = false;
@@ -22,7 +22,7 @@ public class Room
     public void GenerateRoom()
     {
         m_roomGrid = new TileGrid();
-        m_nodeArcs = new List<NodeArc>();
+        m_nodeArcs = new List<TileArc>();
 
         m_roomGrid.m_height = GameplayMananger.s_seedRandom.Next(5, 15);
         m_roomGrid.m_width = GameplayMananger.s_seedRandom.Next(5, 15);
@@ -48,7 +48,6 @@ public class Room
                 }
                 else
                 {
-                    //m_roomGrid.SetTileType(x, y, (GameplayMananger.s_seedRandom.Next(0, 100) < 45) ? TileType.Wall : TileType.Empty);
                     m_roomGrid.SetTileType(x, y, TileType.Empty);
                 }
             }
@@ -88,7 +87,7 @@ public class Room
 
     public void AddArc(Room t_newRoom)
     {
-        m_nodeArcs.Add(new NodeArc(this, t_newRoom));
+        m_nodeArcs.Add(new TileArc(this, t_newRoom));
     }
 
     public void SetIsVisited(bool t_isVisited)

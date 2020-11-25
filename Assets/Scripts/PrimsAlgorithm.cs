@@ -5,17 +5,17 @@ using UnityEngine;
 
 public class PrimsAlgorithm
 {
-    public static List<NodeArc> primMST(Room[] t_rooms, int t_numOfRooms)
+    public static List<TileArc> primMST(Room[] t_rooms)
     {
         foreach(Room room in t_rooms)
         {
             room.SetIsVisited(false);
         }
 
-        List<NodeArc> arclist = new List<NodeArc>();
-        List<NodeArc> treeArcs = new List<NodeArc>();
+        List<TileArc> arclist = new List<TileArc>();
+        List<TileArc> treeArcs = new List<TileArc>();
 
-        foreach(NodeArc arc in t_rooms[0].m_nodeArcs)
+        foreach(TileArc arc in t_rooms[0].m_nodeArcs)
         {
             arclist.Add(arc);
         }
@@ -24,7 +24,7 @@ public class PrimsAlgorithm
 
         t_rooms[0].SetIsVisited(true);
 
-        NodeArc curArc;
+        TileArc curArc;
 
         while (arclist.Count() != 0)
         {
@@ -35,7 +35,7 @@ public class PrimsAlgorithm
                 treeArcs.Add(curArc);
                 curArc.GetTargetRoom().SetIsVisited(true);
 
-                foreach (NodeArc arc in curArc.GetTargetRoom().m_nodeArcs)
+                foreach (TileArc arc in curArc.GetTargetRoom().m_nodeArcs)
                 {
                     arclist.Add(arc);
                 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NodeArc
+public class TileArc
 {
     Room m_startRoom;
     Room m_targetRoom;
@@ -12,7 +12,7 @@ public class NodeArc
 
     int m_weight;
 
-    public NodeArc()
+    public TileArc()
     {
         m_startRoom = null;
         m_targetRoom = null;
@@ -20,7 +20,7 @@ public class NodeArc
         m_weight = 999999;
     }
 
-    public NodeArc(Room t_start, Room t_target)
+    public TileArc(Room t_start, Room t_target)
     {
         m_startRoom = t_start;
         m_targetRoom = t_target;

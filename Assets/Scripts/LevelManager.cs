@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -7,8 +8,8 @@ public class LevelManager : MonoBehaviour
     TileGrid m_mapGrid;
 
     Room[] m_rooms;
-    List<NodeArc> m_arcsMST = new List<NodeArc>();
-    List<NodeArc> m_exitArcs = new List<NodeArc>();
+    List<TileArc> m_arcsMST = new List<TileArc>();
+    List<TileArc> m_exitArcs = new List<TileArc>();
 
     int m_numOfRooms = 40;
     public int m_levelWidth;
@@ -87,12 +88,11 @@ public class LevelManager : MonoBehaviour
             safeLockCount++;
         }
 
-        //Temp Change Later
-        m_numOfRooms = roomIndex;
-        ConnectRooms();
-        m_arcsMST = PrimsAlgorithm.primMST(m_rooms, roomIndex);
+        CreateRoomArcs();
+        m_arcsMST = PrimsAlgorithm.primMST(m_rooms);
         Debug.Log("Count List:" + m_arcsMST.Count);
         createExitArcs();
+        CreateCorridors();
         yield return new WaitForSeconds(0.01f);
     }
 
@@ -101,9 +101,9 @@ public class LevelManager : MonoBehaviour
         List<Pair<int, int>> possibleExits1;
         List<Pair<int, int>> possibleExits2;
 
-        foreach(NodeArc arc in m_arcsMST)
+        foreach(TileArc arc in m_arcsMST)
         {
-            NodeArc exitArc = arc;
+            TileArc exitArc = arc;
 
             possibleExits1 = arc.GetStartRoom().GetPossibleExitsOnMap();
             possibleExits2 = arc.GetTargetRoom().GetPossibleExitsOnMap();
@@ -112,7 +112,7 @@ public class LevelManager : MonoBehaviour
             {
                 foreach (Pair<int, int> possibleExit2 in possibleExits2)
                 {
-                    if(exitArc.GetWeigtht() > NodeArc.CalculateWeight(possibleExit1, possibleExit2))
+                    if(exitArc.GetWeigtht() > TileArc.CalculateWeight(possibleExit1, possibleExit2))
                     {
                         exitArc.SetStartPos(possibleExit1);
                         exitArc.SetTargetPos(possibleExit2);
@@ -136,7 +136,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    void ConnectRooms()
+    void CreateRoomArcs()
     {
         Debug.Log("Start");
         int curRoomID = -1;
@@ -191,6 +191,81 @@ public class LevelManager : MonoBehaviour
         }
 
         Debug.Log("Success");
+    }
+
+    void CreateCorridors()
+    {
+        bool[,] visitedGrid = new bool[m_levelWidth, m_levelHight];
+        Pair<int, int>[,] previousGrid = new Pair<int, int>[m_levelWidth, m_levelHight];
+
+        List<Pair<int, int>> dirList = new List<Pair<int, int>>();
+
+        dirList.Add(new Pair<int, int>(-1, 0));
+        dirList.Add(new Pair<int, int>(0, -1));
+        dirList.Add(new Pair<int, int>(1, 0));
+        dirList.Add(new Pair<int, int>(0, 1));
+
+        foreach (TileArc arc in m_exitArcs)
+        {
+            Pair<int, int> startPos = arc.GetStartPos();
+            Pair<int, int> destPos = arc.GetTargetPos();
+
+            bool targetTileFound = false;
+
+            for (int x= 0; x < m_levelWidth; x++)
+            {
+                for (int y = 0; y < m_levelHight; y++)
+                {
+                    visitedGrid[x, y] = false;
+                    previousGrid[x, y] = null;
+                }
+            }
+
+            List<Pair<int,int>> possibleTileList = new List<Pair<int, int>>();
+            possibleTileList.Add(startPos);
+
+            Pair<int, int> curPos = null;
+
+            while (!targetTileFound && possibleTileList.Count != 0)
+            {
+                curPos = possibleTileList[0];
+
+                if(!targetTileFound)
+                {
+                    foreach (Pair<int, int> dir in dirList)
+                    {
+                        Pair<int, int> tempPos = new Pair<int, int>(curPos.m_first + dir.m_first, curPos.m_second + dir.m_second);
+
+                        if (m_mapGrid.GetTile(tempPos.m_first, tempPos.m_second).GetOwnerID() == -1 &&
+                            visitedGrid[tempPos.m_first, tempPos.m_second] == false)
+                        {
+                            visitedGrid[tempPos.m_first, tempPos.m_second] = true;
+                            previousGrid[tempPos.m_first, tempPos.m_second] = curPos;
+                            possibleTileList.Add(new Pair<int, int>(tempPos.m_first, tempPos.m_second));
+                        }
+                        else if(tempPos.Equals(destPos))
+                        {
+                            previousGrid[tempPos.m_first, tempPos.m_second] = curPos;
+                            targetTileFound = true;
+                            break;
+                        }
+                    }
+                    possibleTileList.Remove(curPos);
+                    possibleTileList = possibleTileList.OrderBy(o => TileArc.CalculateWeight(o, destPos)).ToList();
+                }
+            }
+
+            if(targetTileFound)
+            {
+                curPos = previousGrid[destPos.m_first, destPos.m_second];
+
+                while(!curPos.Equals(startPos))
+                {
+                    m_mapGrid.SetTileType(curPos.m_first, curPos.m_second, TileType.Empty);
+                    curPos = previousGrid[curPos.m_first, curPos.m_second];
+                }
+            }               
+        }
     }
 
     bool ValidateRoomPlacement(int t_xIndex, int t_yIndex, int t_roomWidth, int t_roomHeight)
@@ -253,7 +328,7 @@ public class LevelManager : MonoBehaviour
 
             if(m_arcsMST.Count != 0)
             {
-                foreach (NodeArc arc in m_exitArcs)
+                foreach (TileArc arc in m_exitArcs)
                 {
                     Pair<int, int> roomMapIndex = arc.GetStartPos();
                     Vector3 roomPos = new Vector3(
@@ -281,7 +356,7 @@ public class LevelManager : MonoBehaviour
                 {
                     if (room.GetPositionIndex() != null)
                     {
-                        List<NodeArc> arcs = room.m_nodeArcs;
+                        List<TileArc> arcs = room.m_nodeArcs;
 
                         Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
                         Vector3 roomPos = new Vector3(
@@ -290,7 +365,7 @@ public class LevelManager : MonoBehaviour
                             -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
                             );
 
-                        foreach (NodeArc arc in arcs)
+                        foreach (TileArc arc in arcs)
                         {
                             Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
                             Vector3 conRoomPos = new Vector3(
