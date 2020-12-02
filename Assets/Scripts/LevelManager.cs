@@ -93,6 +93,8 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Count List:" + m_arcsMST.Count);
         createExitArcs();
         CreateCorridors();
+        MeshGenerator meshGen = GetComponent<MeshGenerator>();
+        meshGen.GenerateMesh(m_mapGrid, 1);
         yield return new WaitForSeconds(0.01f);
     }
 
@@ -297,6 +299,7 @@ public class LevelManager : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        
         if (m_mapGrid != null)
         {
             for (int x = 0; x < m_mapGrid.m_width; x++)
@@ -321,7 +324,7 @@ public class LevelManager : MonoBehaviour
                             break;
                     }
 
-                    Vector3 pos = new Vector3(-m_mapGrid.m_width / 2 + x + 0.5f, 0, -m_mapGrid.m_height / 2 + y + 0.5f);
+                    Vector3 pos = new Vector3(x * 1f + 0.5f, 0, y * 1f + 0.5f);
                     Gizmos.DrawCube(pos, Vector3.one);
                 }
             }
@@ -332,16 +335,16 @@ public class LevelManager : MonoBehaviour
                 {
                     Pair<int, int> roomMapIndex = arc.GetStartPos();
                     Vector3 roomPos = new Vector3(
-                        -m_mapGrid.m_width / 2 + roomMapIndex.m_first + 0.5f,
+                        roomMapIndex.m_first * 1f + 0.5f,
                         1,
-                        -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
+                        roomMapIndex.m_second * 1f + 0.5f
                         );
 
                     Pair<int, int> conRoomMapIndex = arc.GetTargetPos();
                     Vector3 conRoomPos = new Vector3(
-                        -m_mapGrid.m_width / 2 + conRoomMapIndex.m_first + 0.5f,
+                        conRoomMapIndex.m_first * 1f + 0.5f,
                         1,
-                        -m_mapGrid.m_height / 2 + conRoomMapIndex.m_second + 0.5f
+                        conRoomMapIndex.m_second * 1f + 0.5f
                         );
 
                     Gizmos.color = Color.green;
@@ -360,19 +363,19 @@ public class LevelManager : MonoBehaviour
 
                         Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
                         Vector3 roomPos = new Vector3(
-                            -m_mapGrid.m_width / 2 + roomMapIndex.m_first + 0.5f,
-                            1,
-                            -m_mapGrid.m_height / 2 + roomMapIndex.m_second + 0.5f
-                            );
+                        roomMapIndex.m_first * 1f + 0.5f,
+                        1,
+                        roomMapIndex.m_second * 1f + 0.5f
+                        );
 
                         foreach (TileArc arc in arcs)
                         {
                             Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
                             Vector3 conRoomPos = new Vector3(
-                                -m_mapGrid.m_width / 2 + conRoomMapIndex.m_first + 0.5f,
-                                1,
-                                -m_mapGrid.m_height / 2 + conRoomMapIndex.m_second + 0.5f
-                                );
+                                    conRoomMapIndex.m_first * 1f + 0.5f,
+                                    1,
+                                    conRoomMapIndex.m_second * 1f + 0.5f
+                                    );
 
                             Gizmos.color = Color.blue;
                             Gizmos.DrawLine(conRoomPos, roomPos);
@@ -380,6 +383,6 @@ public class LevelManager : MonoBehaviour
                     }
                 }
             }  
-        }
+        } 
     }
 }
