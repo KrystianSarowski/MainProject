@@ -71,89 +71,103 @@ public class LevelManager : MonoBehaviour
     }
 
     void OnDrawGizmos()
-    {      
+    {
         if (m_mapGrid != null)
         {
-            for (int x = 0; x < m_mapGrid.m_width; x++)
-            {
-                for (int y = 0; y < m_mapGrid.m_height; y++)
-                {
-                    switch(m_mapGrid.GetTile(x,y).GetTileType())
-                    {
-                        case TileType.Empty:
-                            Gizmos.color = Color.white; 
-                            break;
-                        case TileType.Node:
-                            Gizmos.color = Color.red;
-                            break;
-                        case TileType.Wall:
-                            Gizmos.color = Color.black;
-                            break;
-                        case TileType.Exit:
-                            Gizmos.color = Color.yellow;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    Vector3 pos = new Vector3(x * 1f + 0.5f, 0, y * 1f + 0.5f);
-                    Gizmos.DrawCube(pos, Vector3.one);
-                }
-            }
-
-            if(m_shortestRoomArcs.Count != 0)
-            {
-                foreach (TileArc arc in m_exitArcs)
-                {
-                    Pair<int, int> roomMapIndex = arc.GetStartPos();
-                    Vector3 roomPos = new Vector3(
-                        roomMapIndex.m_first * 1f + 0.5f,
-                        1,
-                        roomMapIndex.m_second * 1f + 0.5f
-                        );
-
-                    Pair<int, int> conRoomMapIndex = arc.GetTargetPos();
-                    Vector3 conRoomPos = new Vector3(
-                        conRoomMapIndex.m_first * 1f + 0.5f,
-                        1,
-                        conRoomMapIndex.m_second * 1f + 0.5f
-                        );
-
-                    Gizmos.color = Color.green;
-                    Gizmos.DrawLine(conRoomPos, roomPos);
-                }
-            }
+            DrawTileTypes();
+            DrawExitArcs();
 
             if (drawAllArcs)
             {
-                foreach (Room room in m_rooms)
+                DrawConnectionArcs();
+            }
+        }
+    }
+
+    void DrawTileTypes()
+    {
+        for (int x = 0; x < m_mapGrid.m_width; x++)
+        {
+            for (int y = 0; y < m_mapGrid.m_height; y++)
+            {
+                switch (m_mapGrid.GetTile(x, y).GetTileType())
                 {
-                    if (room.GetPositionIndex() != null)
-                    {
-                        List<TileArc> arcs = room.m_nodeArcs;
-
-                        Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
-                        Vector3 roomPos = new Vector3(
-                        roomMapIndex.m_first * 1f + 0.5f,
-                        1,
-                        roomMapIndex.m_second * 1f + 0.5f
-                        );
-
-                        foreach (TileArc arc in arcs)
-                        {
-                            Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
-                            Vector3 conRoomPos = new Vector3(
-                                    conRoomMapIndex.m_first * 1f + 0.5f,
-                                    1,
-                                    conRoomMapIndex.m_second * 1f + 0.5f
-                                    );
-
-                            Gizmos.color = Color.blue;
-                            Gizmos.DrawLine(conRoomPos, roomPos);
-                        }
-                    }
+                    case TileType.Empty:
+                        Gizmos.color = Color.white;
+                        break;
+                    case TileType.Node:
+                        Gizmos.color = Color.red;
+                        break;
+                    case TileType.Wall:
+                        Gizmos.color = Color.black;
+                        break;
+                    case TileType.Exit:
+                        Gizmos.color = Color.yellow;
+                        break;
+                    default:
+                        break;
                 }
-            }  
-        } 
+
+                Vector3 pos = new Vector3(x * 1f + 0.5f, 0, y * 1f + 0.5f);
+                Gizmos.DrawCube(pos, Vector3.one);
+            }
+        }
+    }
+
+    void DrawExitArcs()
+    {
+        if (m_shortestRoomArcs.Count != 0)
+        {
+            foreach (TileArc arc in m_exitArcs)
+            {
+                Pair<int, int> roomMapIndex = arc.GetStartPos();
+                Vector3 roomPos = new Vector3(
+                    roomMapIndex.m_first * 1f + 0.5f,
+                    1,
+                    roomMapIndex.m_second * 1f + 0.5f
+                    );
+
+                Pair<int, int> conRoomMapIndex = arc.GetTargetPos();
+                Vector3 conRoomPos = new Vector3(
+                    conRoomMapIndex.m_first * 1f + 0.5f,
+                    1,
+                    conRoomMapIndex.m_second * 1f + 0.5f
+                    );
+
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(conRoomPos, roomPos);
+            }
+        }
+    }
+
+    void DrawConnectionArcs()
+    {
+        foreach (Room room in m_rooms)
+        {
+            if (room.GetPositionIndex() != null)
+            {
+                List<TileArc> arcs = room.m_nodeArcs;
+
+                Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
+                Vector3 roomPos = new Vector3(
+                roomMapIndex.m_first * 1f + 0.5f,
+                1,
+                roomMapIndex.m_second * 1f + 0.5f
+                );
+
+                foreach (TileArc arc in arcs)
+                {
+                    Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
+                    Vector3 conRoomPos = new Vector3(
+                            conRoomMapIndex.m_first * 1f + 0.5f,
+                            1,
+                            conRoomMapIndex.m_second * 1f + 0.5f
+                            );
+
+                    Gizmos.color = Color.blue;
+                    Gizmos.DrawLine(conRoomPos, roomPos);
+                }
+            }
+        }
     }
 }

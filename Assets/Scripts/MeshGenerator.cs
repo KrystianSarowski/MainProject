@@ -8,7 +8,7 @@ public class MeshGenerator : MonoBehaviour
     public SquareGrid m_squareGrid;
 
     //The mesh filter for the walls.
-    public MeshFilter walls;
+    public MeshFilter m_walls;
 
     //List of the vartices created from the squares within the square grid.
     List<Vector3> m_vertices;
@@ -95,7 +95,10 @@ public class MeshGenerator : MonoBehaviour
 
         wallMesh.vertices = wallVertices.ToArray();
         wallMesh.triangles = wallTriangles.ToArray();
-        walls.mesh = wallMesh;
+        m_walls.mesh = wallMesh;
+
+        MeshCollider wallsCollider = m_walls.gameObject.AddComponent<MeshCollider>();
+        wallsCollider.sharedMesh = m_walls.mesh;
     }
 
     void TriangulateSquare(Square square)
