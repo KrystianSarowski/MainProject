@@ -17,6 +17,12 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         m_rb = GetComponent<Rigidbody>();
+
+        GameObject camera = FindObjectOfType<CameraController>().gameObject;
+
+        camera.transform.parent = gameObject.transform;
+
+        camera.GetComponent<CameraController>().AttachPlayer();
     }
 
     //Update is called once per frame
