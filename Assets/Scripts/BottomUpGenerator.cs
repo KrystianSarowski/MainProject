@@ -13,8 +13,8 @@ public class BottomUpGenerator
 
         while (roomIndex < numOfRooms && safeLockCount < 400)
         {
-            Pair<int, int> position = new Pair<int, int>(GameplayMananger.s_seedRandom.Next(0, t_mapGrid.m_width),
-               GameplayMananger.s_seedRandom.Next(0, t_mapGrid.m_height));
+            Pair<int, int> position = new Pair<int, int>(GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_width),
+               GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_height));
 
             TileGrid roomGrid = t_roomsToPlace[roomIndex].m_roomGrid;
 

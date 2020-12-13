@@ -22,8 +22,8 @@ public class Room
         m_roomGrid = new TileGrid();
         m_nodeArcs = new List<TileArc>();
 
-        m_roomGrid.m_height = GameplayMananger.s_seedRandom.Next(5, 15);
-        m_roomGrid.m_width = GameplayMananger.s_seedRandom.Next(5, 15);
+        m_roomGrid.m_height = GameplayManager.s_seedRandom.Next(5, 15);
+        m_roomGrid.m_width = GameplayManager.s_seedRandom.Next(5, 15);
 
         m_roomGrid.CreateTileGrid();
         RandomFillRoom();
