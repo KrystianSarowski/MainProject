@@ -169,9 +169,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_playerPrefab: {fileID: 8541690948009524850, guid: eeb2388182d50604596538486a3114fd,
     type: 3}
-  m_numOfRooms: 10
-  m_levelWidth: 50
-  m_levelHight: 50
+  m_numOfRooms: 80
+  m_levelWidth: 120
+  m_levelHight: 120
   m_tileSize: 1
   m_wallHeight: 2
   m_floorMaterial: {fileID: 2100000, guid: 8d530ffe6c4968843806085897955b9d, type: 2}
@@ -573,6 +573,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Manager
+      objectReference: {fileID: 0}
+    - target: {fileID: 4967812692315743383, guid: c7b4cb2e95704424a97b72237a7f9458,
+        type: 3}
+      propertyPath: m_seed
+      value: Demo01
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c7b4cb2e95704424a97b72237a7f9458, type: 3}

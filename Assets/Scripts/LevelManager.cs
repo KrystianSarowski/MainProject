@@ -47,7 +47,6 @@ public class LevelManager : MonoBehaviour
             for(int i =0; i < m_numOfRooms; i++)
             {
                 m_rooms.Add(new Room());
-                m_rooms[i].SetRoomID(i);
                 m_rooms[i].GenerateRoom();
             }
 
@@ -70,6 +69,8 @@ public class LevelManager : MonoBehaviour
         meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
         CreateCeilingAndFloor();
         SpawnPlayer();
+
+        yield return null;
     }
 
     void CreateCeilingAndFloor()
@@ -95,9 +96,9 @@ public class LevelManager : MonoBehaviour
 
     public void SpawnPlayer()
     {
-        Pair<int, int> nodeIndex = m_rooms[0].GetNodePositonOnMap();
+        GridIndex nodeIndex = m_rooms[0].GetNodePositonOnMap();
 
-        Vector3 spawnPosition = new Vector3(nodeIndex.m_first * m_tileSize + m_halfTileSize, -m_wallHeight / 2.0f, nodeIndex.m_second * m_tileSize + m_halfTileSize);
+        Vector3 spawnPosition = new Vector3(nodeIndex.m_x * m_tileSize + m_halfTileSize, -m_wallHeight / 2.0f, nodeIndex.m_y * m_tileSize + m_halfTileSize);
 
         Instantiate(m_playerPrefab, spawnPosition, Quaternion.identity);
         m_rooms[0].GetNodePositonOnMap();
@@ -123,6 +124,7 @@ public class LevelManager : MonoBehaviour
         if (m_mapGrid != null)
         {
             DrawTileTypes();
+            //DrawMST();
             DrawExitArcs();
 
             if (drawAllArcs)
@@ -138,7 +140,7 @@ public class LevelManager : MonoBehaviour
         {
             for (int y = 0; y < m_mapGrid.m_height; y++)
             {
-                switch (m_mapGrid.GetTile(x, y).GetTileType())
+                switch (m_mapGrid.GetTile(new GridIndex(x, y)).GetTileType())
                 {
                     case TileType.Empty:
                         Gizmos.color = Color.white;
@@ -164,25 +166,51 @@ public class LevelManager : MonoBehaviour
 
     void DrawExitArcs()
     {
-        if (m_shortestRoomArcs.Count != 0)
+        if (m_exitArcs.Count != 0)
         {
             foreach (TileArc arc in m_exitArcs)
             {
-                Pair<int, int> roomMapIndex = arc.GetStartPos();
+                GridIndex roomMapIndex = arc.GetStartPos();
                 Vector3 roomPos = new Vector3(
-                    roomMapIndex.m_first * m_tileSize + m_halfTileSize,
-                    1,
-                    roomMapIndex.m_second * m_tileSize + m_halfTileSize
+                    roomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                    0,
+                    roomMapIndex.m_y * m_tileSize + m_halfTileSize
                     );
 
-                Pair<int, int> conRoomMapIndex = arc.GetTargetPos();
+                GridIndex conRoomMapIndex = arc.GetTargetPos();
                 Vector3 conRoomPos = new Vector3(
-                    conRoomMapIndex.m_first * m_tileSize + m_halfTileSize,
-                    1,
-                    conRoomMapIndex.m_second * m_tileSize + m_halfTileSize
+                    conRoomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                    0,
+                    conRoomMapIndex.m_y * m_tileSize + m_halfTileSize
                     );
 
                 Gizmos.color = Color.green;
+                Gizmos.DrawLine(conRoomPos, roomPos);
+            }
+        }
+    }
+
+    void DrawMST()
+    {
+        if (m_shortestRoomArcs.Count != 0)
+        {
+            foreach (TileArc arc in m_shortestRoomArcs)
+            {
+                GridIndex roomMapIndex = arc.GetStartPos();
+                Vector3 roomPos = new Vector3(
+                    roomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                    0,
+                    roomMapIndex.m_y * m_tileSize + m_halfTileSize
+                    );
+
+                GridIndex conRoomMapIndex = arc.GetTargetPos();
+                Vector3 conRoomPos = new Vector3(
+                    conRoomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                    0,
+                    conRoomMapIndex.m_y * m_tileSize + m_halfTileSize
+                    );
+
+                Gizmos.color = Color.red;
                 Gizmos.DrawLine(conRoomPos, roomPos);
             }
         }
@@ -192,24 +220,24 @@ public class LevelManager : MonoBehaviour
     {
         foreach (Room room in m_rooms)
         {
-            if (room.GetPositionIndex() != null)
+            if (room.GetRoomID() != -1)
             {
                 List<TileArc> arcs = room.m_nodeArcs;
 
-                Pair<int, int> roomMapIndex = room.GetNodePositonOnMap();
+                GridIndex roomMapIndex = room.GetNodePositonOnMap();
                 Vector3 roomPos = new Vector3(
-                roomMapIndex.m_first * m_tileSize + m_halfTileSize,
-                1,
-                roomMapIndex.m_second * m_tileSize + m_halfTileSize
+                roomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                0,
+                roomMapIndex.m_y * m_tileSize + m_halfTileSize
                 );
 
                 foreach (TileArc arc in arcs)
                 {
-                    Pair<int, int> conRoomMapIndex = arc.GetTargetRoom().GetNodePositonOnMap();
+                    GridIndex conRoomMapIndex = arc.GetTargetPos();
                     Vector3 conRoomPos = new Vector3(
-                            conRoomMapIndex.m_first * m_tileSize + m_halfTileSize,
-                            1,
-                            conRoomMapIndex.m_second * m_tileSize + m_halfTileSize
+                            conRoomMapIndex.m_x * m_tileSize + m_halfTileSize,
+                            0,
+                            conRoomMapIndex.m_y * m_tileSize + m_halfTileSize
                             );
 
                     Gizmos.color = Color.blue;

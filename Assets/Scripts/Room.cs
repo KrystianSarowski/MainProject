@@ -10,13 +10,14 @@ public class Room
     int m_roomID = -1;
     public bool m_roomAdded = false;
 
-    Pair<int, int> m_nodePosIndex;
-    Pair<int, int> m_posIndex;
+    GridIndex m_nodePosIndex;
+    GridIndex m_posIndex;
 
-    List<Pair<int, int>> m_possibleExitList = new List<Pair<int, int>>();
-    List<Pair<int, int>> m_exitList = new List<Pair<int, int>>();
+    List<GridIndex> m_possibleExitList = new List<GridIndex>();
+    List<GridIndex> m_exitList = new List<GridIndex>();
 
     bool m_isVisited = false;
+
     public void GenerateRoom()
     {
         m_roomGrid = new TileGrid();
@@ -28,8 +29,8 @@ public class Room
         m_roomGrid.CreateTileGrid();
         RandomFillRoom();
 
-        m_nodePosIndex = new Pair<int, int>(m_roomGrid.m_width / 2, m_roomGrid.m_height / 2);
-        m_roomGrid.SetTileType(m_nodePosIndex.m_first, m_nodePosIndex.m_second, TileType.Node);
+        m_nodePosIndex = new GridIndex(m_roomGrid.m_width / 2, m_roomGrid.m_height / 2);
+        m_roomGrid.SetTileType(m_nodePosIndex, TileType.Node);
 
         CreatePossibleExits();
     }
@@ -42,11 +43,11 @@ public class Room
             {
                 if (x == 0 || x == m_roomGrid.m_width - 1 || y == 0 || y == m_roomGrid.m_height - 1)
                 {
-                    m_roomGrid.SetTileType(x, y, TileType.Wall);
+                    m_roomGrid.SetTileType(new GridIndex(x, y), TileType.Wall);
                 }
                 else
                 {
-                    m_roomGrid.SetTileType(x, y, TileType.Empty);
+                    m_roomGrid.SetTileType(new GridIndex(x, y), TileType.Empty);
                 }
             }
         }
@@ -62,25 +63,19 @@ public class Room
         return m_roomID;
     }
 
-    public void SetPositionIndex(Pair<int, int> t_newPosIndex)
+    public void SetPositionIndex(GridIndex t_newPosIndex)
     {
         m_posIndex = t_newPosIndex;
     }
 
-    public Pair<int, int> GetPositionIndex()
+    public GridIndex GetPositionIndex()
     {
         return m_posIndex;
     }
 
-    public Pair<int, int> GetNodePositonOnMap()
+    public GridIndex GetNodePositonOnMap()
     {
-        if (m_posIndex != null)
-        {
-            return new Pair<int, int>(m_posIndex.m_first + m_nodePosIndex.m_first,
-                m_posIndex.m_second + m_nodePosIndex.m_second);
-        }
-
-        return null;
+        return new GridIndex(m_posIndex.m_x + m_nodePosIndex.m_x, m_posIndex.m_y + m_nodePosIndex.m_y); 
     }
 
     public void AddArc(Room t_newRoom)
@@ -100,43 +95,43 @@ public class Room
 
     void CreatePossibleExits()
     {
-        m_possibleExitList.Add(new Pair<int, int>(0, m_nodePosIndex.m_second));
-        m_possibleExitList.Add(new Pair<int, int>(m_nodePosIndex.m_first, 0));
-        m_possibleExitList.Add(new Pair<int, int>(m_roomGrid.m_width - 1, m_nodePosIndex.m_second));
-        m_possibleExitList.Add(new Pair<int, int>(m_nodePosIndex.m_first, m_roomGrid.m_height - 1));
+        m_possibleExitList.Add(new GridIndex(0, m_nodePosIndex.m_y));
+        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, 0));
+        m_possibleExitList.Add(new GridIndex(m_roomGrid.m_width - 1, m_nodePosIndex.m_y));
+        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, m_roomGrid.m_height - 1));
     }
 
-    public List<Pair<int, int>> GetPossibleExitsOnMap()
+    public List<GridIndex> GetPossibleExitsOnMap()
     {
-        List<Pair<int, int>> possibleExitsOnMap = new List<Pair<int, int>>();
+        List<GridIndex> possibleExitsOnMap = new List<GridIndex>();
 
-        foreach (Pair<int, int> exit in m_possibleExitList)
+        foreach (GridIndex exit in m_possibleExitList)
         {
-            possibleExitsOnMap.Add(new Pair<int, int>(exit.m_first + m_posIndex.m_first, exit.m_second + m_posIndex.m_second));
+            possibleExitsOnMap.Add(new GridIndex(exit.m_x + m_posIndex.m_x, exit.m_y + m_posIndex.m_y));
         }
 
         return possibleExitsOnMap;
     }
 
-    public void AddExitToRoom(Pair<int, int> t_exitOnMapIndex)
+    public void AddExitToRoom(GridIndex t_exitOnMapIndex)
     {
-        Pair<int, int> exitInRoomIndex = new Pair<int, int>(t_exitOnMapIndex.m_first - m_posIndex.m_first,
-            t_exitOnMapIndex.m_second - m_posIndex.m_second);
+        GridIndex roomExitIndex = new GridIndex(t_exitOnMapIndex.m_x - m_posIndex.m_x,
+            t_exitOnMapIndex.m_y - m_posIndex.m_y);
 
-        if (!m_exitList.Contains(exitInRoomIndex))
+        if (!m_exitList.Contains(roomExitIndex))
         {
-            m_exitList.Add(exitInRoomIndex);
-            m_roomGrid.SetTileType(exitInRoomIndex.m_first, exitInRoomIndex.m_second, TileType.Exit);
+            m_exitList.Add(roomExitIndex);
+            m_roomGrid.SetTileType(roomExitIndex, TileType.Exit);
         }
     }
 
-    public List<Pair<int, int>> GetExitsOnMap()
+    public List<GridIndex> GetExitsOnMap()
     {
-        List<Pair<int, int>> exitsOnMap = new List<Pair<int, int>>();
+        List<GridIndex> exitsOnMap = new List<GridIndex>();
 
-        foreach (Pair<int, int> exit in m_exitList)
+        foreach (GridIndex exit in m_exitList)
         {
-            exitsOnMap.Add(new Pair<int, int>(exit.m_first + m_posIndex.m_first, exit.m_second + m_posIndex.m_second));
+            exitsOnMap.Add(new GridIndex(exit.m_x + m_posIndex.m_x, exit.m_y + m_posIndex.m_y));
         }
 
         return exitsOnMap;

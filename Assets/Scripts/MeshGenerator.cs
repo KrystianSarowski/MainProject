@@ -402,7 +402,7 @@ public class MeshGenerator : MonoBehaviour
                 for (int y = 0; y < mapHight; y++)
                 {
                     Vector3 position = new Vector3(x * t_squareSize + t_squareSize / 2, 0, y * t_squareSize + t_squareSize / 2);
-                    primaryVertexGrid[x, y] = new PrimaryVertex(position, t_tileGrid.GetTile(x, y).GetTileType() == TileType.Wall, t_squareSize);
+                    primaryVertexGrid[x, y] = new PrimaryVertex(position, t_tileGrid.GetTile(new GridIndex(x, y)).GetTileType() == TileType.Wall, t_squareSize);
 
                 }
             }

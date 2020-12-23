@@ -14,6 +14,9 @@ public class Tile
 {
     private int m_tileID = -1;
     private int m_ownerID = -1;
+
+    private GridIndex m_pos;
+
     private TileType m_type = TileType.Wall;
 
     public void SetTileID(int t_tileID)
@@ -31,6 +34,11 @@ public class Tile
         m_type = t_tileType;
     }
 
+    public void SetPosition(GridIndex t_pos)
+    {
+        m_pos = t_pos;
+    }
+
     public int GetTileID()
     {
         return m_tileID;
@@ -45,4 +53,10 @@ public class Tile
     {
         return m_type;
     }
+
+    public GridIndex GetPosition()
+    {
+        return m_pos;
+    }
+
 }

@@ -7,8 +7,8 @@ public class TileArc
     Room m_startRoom;
     Room m_targetRoom;
 
-    Pair<int, int> m_startPos;
-    Pair<int, int> m_targetPos;
+    GridIndex m_startPos;
+    GridIndex m_targetPos;
 
     int m_weight;
 
@@ -31,32 +31,25 @@ public class TileArc
         m_weight = CalculateWeight(m_startPos, m_targetPos);
     }
 
-    public void SetTargetPos(Pair<int,int> t_targetPos)
+    public void SetTargetPos(GridIndex t_targetPos)
     {
         m_targetPos = t_targetPos;
 
-        if(m_startPos != null)
-        {
-            m_weight = CalculateWeight(m_startPos, m_targetPos);
-        }
+        m_weight = CalculateWeight(m_startPos, m_targetPos);
     }
 
-    public void SetStartPos(Pair<int, int> t_startPos)
+    public void SetStartPos(GridIndex t_startPos)
     {
         m_startPos = t_startPos;
-
-        if (m_targetPos != null)
-        {
-            m_weight = CalculateWeight(m_startPos, m_targetPos);
-        }
+        m_weight = CalculateWeight(m_startPos, m_targetPos);
     }
 
-    public Pair<int, int> GetStartPos()
+    public GridIndex GetStartPos()
     {
         return m_startPos;
     }
 
-    public Pair<int, int> GetTargetPos()
+    public GridIndex GetTargetPos()
     {
         return m_targetPos;
     }
@@ -76,9 +69,9 @@ public class TileArc
         return m_weight;
     }
 
-    public static int CalculateWeight(Pair<int,int> t_posOne, Pair<int,int>t_posTwo)
+    public static int CalculateWeight(GridIndex t_posOne, GridIndex t_posTwo)
     {
-        return (int)Mathf.Sqrt(Mathf.Pow(t_posOne.m_first - t_posTwo.m_first, 2) 
-            + Mathf.Pow(t_posOne.m_second - t_posTwo.m_second, 2));
+        return (int)Mathf.Sqrt(Mathf.Pow(t_posOne.m_x - t_posTwo.m_x, 2) 
+            + Mathf.Pow(t_posOne.m_y - t_posTwo.m_y, 2));
     }
 }
