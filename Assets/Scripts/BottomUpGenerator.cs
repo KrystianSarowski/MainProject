@@ -16,7 +16,7 @@ public class BottomUpGenerator
             GridIndex position = new GridIndex(GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_width),
                GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_height));
 
-            TileGrid roomGrid = t_roomsToPlace[roomIndex].m_roomGrid;
+            TileGrid roomGrid = t_roomsToPlace[roomIndex].m_grid;
 
             if (ValidatePlacement(position, roomGrid.m_width, roomGrid.m_height, t_mapGrid))
             {
@@ -38,7 +38,6 @@ public class BottomUpGenerator
                 }
 
                 roomIndex++;
-
                 yield return null;
             }
             safeLockCount++;
@@ -76,8 +75,8 @@ public class BottomUpGenerator
 
     public static void CreateRoomArcs(TileGrid t_mapGrid, List<Room> t_rooms)
     {
-        int curRoomID = -1;
-        int prevRoomID = -1;
+        int curRoomID;
+        int prevRoomID;
 
         for (int x = 0; x < t_mapGrid.m_width; x++)
         {

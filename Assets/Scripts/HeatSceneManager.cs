@@ -4,118 +4,233 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+public struct GenerationStats
+{
+    public float m_avergeTime;
+    public float m_shortestTime;
+    public float m_longestTime;
+
+    public float m_avergeTileUse;
+}
+
 public class HeatSceneManager : MonoBehaviour
 {
-    TileGrid m_mapGrid;
+    List<TileGrid> m_mapGrids;
 
-    List<Room> m_rooms;
-    List<TileArc> m_shortestRoomArcs = new List<TileArc>();
-    List<TileArc> m_exitArcs = new List<TileArc>();
+    List<List<Room>> m_roomLists;
 
     public GameObject m_heatTile;
 
     public int m_mapsToGenerate = 10;
-    public float m_mapsGenerated = 0;
 
-    int m_numOfRooms = 10;
-    int m_levelWidth = 40;
-    int m_levelHight = 40;
+    int m_numOfRooms = 20;
+    int m_levelWidth = 80;
+    int m_levelHight = 80;
 
-    int[,] m_heatMap;
-    GameObject[,] m_heatTiles;
+    int[,] m_heatMapBottomUp;
+    int[,] m_heatMapTopDown;
+
+    GameObject[,] m_tilesBottomUp;
+    GameObject[,] m_tilesTopDown;
 
     Canvas m_canvas;
 
     public Color m_startColour;
     public Color m_endColour;
 
-    bool bob = false;
+    GenerationStats m_bottomUpStats;
+    GenerationStats m_topDownStats;
 
     private void Start()
     {
         m_canvas = FindObjectOfType<Canvas>();
 
-        m_heatMap = new int[m_levelWidth, m_levelHight];
-        m_heatTiles = new GameObject[m_levelWidth, m_levelHight];
+        m_heatMapBottomUp = new int[m_levelWidth, m_levelHight];
+        m_tilesBottomUp = new GameObject[m_levelWidth, m_levelHight];
 
-        for(int x = 0; x < m_levelWidth; x++)
+        m_heatMapTopDown = new int[m_levelWidth, m_levelHight];
+        m_tilesTopDown = new GameObject[m_levelWidth, m_levelHight];
+
+        int secondGridOffset = 50 * m_levelWidth + 1000;
+
+        for (int x = 0; x < m_levelWidth; x++)
         {
             for(int y = 0; y < m_levelHight; y++)
             {
-                m_heatTiles[x, y] = Instantiate(m_heatTile, m_canvas.transform);
-                m_heatTiles[x, y].transform.SetParent(m_canvas.transform);
-                m_heatTiles[x, y].transform.position += new Vector3(100 * x, 100 * y, 0);
+                m_tilesBottomUp[x, y] = Instantiate(m_heatTile, m_canvas.transform);
+                m_tilesBottomUp[x, y].transform.SetParent(m_canvas.transform);
+                m_tilesBottomUp[x, y].transform.position += new Vector3(50 * x, 50 * y, 0);
+                m_tilesBottomUp[x, y].GetComponent<Image>().color = m_startColour;
+
+                m_tilesTopDown[x, y] = Instantiate(m_heatTile, m_canvas.transform);
+                m_tilesTopDown[x, y].transform.SetParent(m_canvas.transform);
+                m_tilesTopDown[x, y].transform.position += new Vector3(secondGridOffset + 50 * x, 50 * y, 0);
+                m_tilesTopDown[x, y].GetComponent<Image>().color = m_startColour;
             }
         }
 
-        StartCoroutine(GenerateHeatMap());
+        m_mapGrids = new List<TileGrid>();
+        m_roomLists = new List<List<Room>>();
+
+        m_mapGrids.Add(new TileGrid());
+        m_mapGrids.Add(new TileGrid());
+
+        m_roomLists.Add(new List<Room>());
+        m_roomLists.Add(new List<Room>());
+
+        StartCoroutine(GenerateHeatMapBottomUp());
+        StartCoroutine(GenerateHeatMapTopDown());
     }
 
-    IEnumerator GenerateHeatMap()
+    IEnumerator GenerateHeatMapBottomUp()
     {
         for (int x = 0; x < m_levelWidth; x++)
         {
             for(int y = 0; y < m_levelHight; y++)
             {
-                m_heatMap[x, y] = 0;
+                m_heatMapBottomUp[x, y] = 0;
             }
         }
 
-        m_mapsGenerated = 0;
+        float mapsGenerated = 0;
+        m_bottomUpStats.m_shortestTime = 10000.0f;
 
-        while(m_mapsGenerated != m_mapsToGenerate)
+        while (mapsGenerated != m_mapsToGenerate)
         {
-            m_mapGrid = new TileGrid();
-            m_mapGrid.m_width = m_levelWidth;
-            m_mapGrid.m_height = m_levelHight;
-            m_mapGrid.CreateTileGrid();
+            float startTime = Time.time;
 
-            m_rooms = new List<Room>();
+            m_mapGrids[0] = new TileGrid(m_levelWidth, m_levelHight);
+            m_mapGrids[0].CreateTileGrid();
+
+            m_roomLists[0] = new List<Room>();
 
             for (int i = 0; i < m_numOfRooms; i++)
             {
-                m_rooms.Add(new Room());
-                m_rooms[i].SetRoomID(i);
-                m_rooms[i].GenerateRoom();
+                m_roomLists[0].Add(new Room());
+                m_roomLists[0][i].SetRoomID(i);
+                m_roomLists[0][i].GenerateRoom();
             }
 
             yield return StartCoroutine(CreateLevelBottomUp());
 
-            m_mapsGenerated++;
+            float finishTime = Time.time;
 
-            for (int x = 0; x < m_levelWidth; x++)
+            mapsGenerated = UpdateHeatMap(mapsGenerated, m_mapGrids[0], m_heatMapBottomUp, m_tilesBottomUp);
+            m_bottomUpStats = UpdateStats(mapsGenerated, finishTime - startTime, m_bottomUpStats);
+        }
+
+        Debug.Log(m_bottomUpStats.m_avergeTime);
+    }
+
+    IEnumerator GenerateHeatMapTopDown()
+    {
+        for (int x = 0; x < m_levelWidth; x++)
+        {
+            for (int y = 0; y < m_levelHight; y++)
             {
-                for (int y = 0; y < m_levelHight; y++)
-                {
-                    if(m_mapGrid.GetTile(new GridIndex(x,y)).GetTileType() != TileType.Wall)
-                    {
-                        m_heatMap[x, y]++;
-                    }
-                    m_heatTiles[x, y].GetComponent<Image>().color = Color.Lerp(m_startColour, m_endColour, m_heatMap[x, y] / m_mapsGenerated);
-                }
+                m_heatMapBottomUp[x, y] = 0;
             }
         }
+
+        float mapsGenerated = 0;
+        m_topDownStats.m_shortestTime = 10000.0f;
+
+        while (mapsGenerated != m_mapsToGenerate)
+        {
+            float startTime = Time.time;
+
+            m_mapGrids[1] = new TileGrid(m_levelWidth, m_levelHight);
+            m_mapGrids[1].CreateTileGrid();
+
+            m_roomLists[1] = new List<Room>();
+
+            for (int i = 0; i < m_numOfRooms; i++)
+            {
+                m_roomLists[1].Add(new Room());
+                m_roomLists[1][i].SetRoomID(i);
+                m_roomLists[1][i].GenerateRoom();
+            }
+
+            yield return StartCoroutine(CreateLevelTopDown());
+
+            float finishTime = Time.time;
+
+            mapsGenerated = UpdateHeatMap(mapsGenerated, m_mapGrids[1], m_heatMapTopDown, m_tilesTopDown);
+            m_topDownStats = UpdateStats(mapsGenerated, finishTime - startTime, m_topDownStats);          
+        }
+
+        Debug.Log(m_topDownStats.m_avergeTime);
+    }
+
+    public GenerationStats UpdateStats(float t_mapsGenerated, float t_elapsedTime, GenerationStats t_stats)
+    {
+        if(t_stats.m_longestTime < t_elapsedTime)
+        {
+            t_stats.m_longestTime = t_elapsedTime;
+        }
+
+        if(t_stats.m_shortestTime > t_elapsedTime)
+        {
+            t_stats.m_shortestTime = t_elapsedTime;
+        }
+
+        t_stats.m_avergeTime = (t_stats.m_avergeTime * (t_mapsGenerated - 1) + t_elapsedTime) / t_mapsGenerated;
+
+        return t_stats;
+    }
+
+    float UpdateHeatMap(float t_mapsGenerated, TileGrid t_grid, int[,] t_heatMap, GameObject[,] t_tileMap)
+    {
+        t_mapsGenerated++;
+
+        for (int x = 0; x < m_levelWidth; x++)
+        {
+            for (int y = 0; y < m_levelHight; y++)
+            {
+                if (t_grid.GetTile(new GridIndex(x, y)).GetOwnerID() != -1)
+                {
+                    t_heatMap[x, y]++;
+                }
+
+                t_tileMap[x, y].GetComponent<Image>().color = 
+                    Color.Lerp(m_startColour, m_endColour, t_heatMap[x, y] / t_mapsGenerated);
+            }
+        }
+
+        return t_mapsGenerated;
     }
 
     IEnumerator CreateLevelBottomUp()
     {
-        m_shortestRoomArcs.Clear();
-        m_exitArcs.Clear();
+        List<TileArc> shortestRoomArcs;
+        List<TileArc> exitArcs = new List<TileArc>();
 
-        yield return StartCoroutine(BottomUpGenerator.PlaceRooms(m_mapGrid, m_rooms));
+        yield return StartCoroutine(BottomUpGenerator.PlaceRooms(m_mapGrids[0], m_roomLists[0]));
 
-        BottomUpGenerator.CreateRoomArcs(m_mapGrid, m_rooms);
+        BottomUpGenerator.CreateRoomArcs(m_mapGrids[0], m_roomLists[0]);
 
-        m_shortestRoomArcs = BottomUpGenerator.CreateMST(m_rooms);
+        shortestRoomArcs = BottomUpGenerator.CreateMST(m_roomLists[0]);
 
-        BottomUpGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_rooms);
-        BottomUpGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
+        BottomUpGenerator.CreateExitArcs(shortestRoomArcs, exitArcs, m_mapGrids[0], m_roomLists[0]);
+        BottomUpGenerator.CreateCorridors(exitArcs, m_mapGrids[0]);
 
         yield return null;
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator CreateLevelTopDown()
     {
+        List<TileArc> shortestRoomArcs = new List<TileArc>();
+        List<TileArc> exitArcs = new List<TileArc>();
+
+        GridArea root = new GridArea();
+
+        yield return StartCoroutine(TopDownGenerator.PlaceRooms(root, m_mapGrids[1], m_roomLists[1]));
+
+        TopDownGenerator.ConnectRooms(root, shortestRoomArcs);
+
+        TopDownGenerator.CreateExitArcs(shortestRoomArcs, exitArcs, m_mapGrids[1], m_roomLists[1]);
+        TopDownGenerator.CreateCorridors(exitArcs, m_mapGrids[1]);
+
+        yield return null;
     }
 }

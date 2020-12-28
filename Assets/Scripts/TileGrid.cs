@@ -27,6 +27,18 @@ public class TileGrid
 
     Tile[,] m_grid;
 
+    public TileGrid()
+    {
+        m_width = -1;
+        m_height = -1;
+    }
+
+    public TileGrid(int t_width, int t_height)
+    {
+        m_width = t_width;
+        m_height = t_height;
+    }
+
     public void CreateTileGrid()
     {
         m_grid = new Tile[m_width, m_height];

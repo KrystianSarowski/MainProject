@@ -3,9 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+public enum GenerationType
+{
+    TopDown,
+    BottomUp
+}
+
 public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager s_instance;
+
+    public GenerationType m_generationType;
 
     public string m_seed;
 
@@ -30,6 +38,7 @@ public class GameplayManager : MonoBehaviour
             s_instance = this;
             DontDestroyOnLoad(gameObject);
             s_seedRandom = new System.Random(m_seed.GetHashCode());
+            m_generationType = GenerationType.BottomUp;
         }
     }
 

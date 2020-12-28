@@ -70,4 +70,14 @@ public class MainMenuManager : MonoBehaviour
 
         GameplayManager.LoadScene(t_sceneName);
     }
+
+    public void SetGenerationTypeTopDown()
+    {
+        FindObjectOfType<GameplayManager>().m_generationType = GenerationType.TopDown;
+    }
+
+    public void SetGenerationTypeBottomUp()
+    {
+        FindObjectOfType<GameplayManager>().m_generationType = GenerationType.BottomUp;
+    }
 }

@@ -449,7 +449,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 500, y: 500}
+  m_SizeDelta: {x: 10000, y: 10000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1392753206 stripped
 GameObject:
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_heatTile: {fileID: 8572353320475201448, guid: 3345f06894c7bd842905157e3d6cd41a,
     type: 3}
-  m_mapsToGenerate: 1000
+  m_mapsToGenerate: 100
   m_mapsGenerated: 0
   m_startColour: {r: 0.095185116, g: 0.17254494, b: 0.2924528, a: 1}
   m_endColour: {r: 1, g: 0.3963673, b: 0, a: 1}
@@ -552,7 +552,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838819898}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4500, y: 2000, z: -4800}
+  m_LocalPosition: {x: 0, y: -2200, z: -4800}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

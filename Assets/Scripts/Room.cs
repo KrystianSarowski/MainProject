@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Room
 {
-    public TileGrid m_roomGrid;
+    public TileGrid m_grid;
     public List<TileArc> m_nodeArcs;
 
     int m_roomID = -1;
     public bool m_roomAdded = false;
 
-    GridIndex m_nodePosIndex;
+    public GridIndex m_nodePosIndex;
     GridIndex m_posIndex;
 
     List<GridIndex> m_possibleExitList = new List<GridIndex>();
@@ -20,34 +20,34 @@ public class Room
 
     public void GenerateRoom()
     {
-        m_roomGrid = new TileGrid();
+        m_grid = new TileGrid();
         m_nodeArcs = new List<TileArc>();
 
-        m_roomGrid.m_height = GameplayManager.s_seedRandom.Next(5, 15);
-        m_roomGrid.m_width = GameplayManager.s_seedRandom.Next(5, 15);
+        m_grid.m_height = GameplayManager.s_seedRandom.Next(5, 15);
+        m_grid.m_width = GameplayManager.s_seedRandom.Next(5, 15);
 
-        m_roomGrid.CreateTileGrid();
+        m_grid.CreateTileGrid();
         RandomFillRoom();
 
-        m_nodePosIndex = new GridIndex(m_roomGrid.m_width / 2, m_roomGrid.m_height / 2);
-        m_roomGrid.SetTileType(m_nodePosIndex, TileType.Node);
+        m_nodePosIndex = new GridIndex(m_grid.m_width / 2, m_grid.m_height / 2);
+        m_grid.SetTileType(m_nodePosIndex, TileType.Node);
 
         CreatePossibleExits();
     }
 
     void RandomFillRoom()
     {
-        for (int x = 0; x < m_roomGrid.m_width; x++)
+        for (int x = 0; x < m_grid.m_width; x++)
         {
-            for (int y = 0; y < m_roomGrid.m_height; y++)
+            for (int y = 0; y < m_grid.m_height; y++)
             {
-                if (x == 0 || x == m_roomGrid.m_width - 1 || y == 0 || y == m_roomGrid.m_height - 1)
+                if (x == 0 || x == m_grid.m_width - 1 || y == 0 || y == m_grid.m_height - 1)
                 {
-                    m_roomGrid.SetTileType(new GridIndex(x, y), TileType.Wall);
+                    m_grid.SetTileType(new GridIndex(x, y), TileType.Wall);
                 }
                 else
                 {
-                    m_roomGrid.SetTileType(new GridIndex(x, y), TileType.Empty);
+                    m_grid.SetTileType(new GridIndex(x, y), TileType.Empty);
                 }
             }
         }
@@ -97,8 +97,8 @@ public class Room
     {
         m_possibleExitList.Add(new GridIndex(0, m_nodePosIndex.m_y));
         m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, 0));
-        m_possibleExitList.Add(new GridIndex(m_roomGrid.m_width - 1, m_nodePosIndex.m_y));
-        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, m_roomGrid.m_height - 1));
+        m_possibleExitList.Add(new GridIndex(m_grid.m_width - 1, m_nodePosIndex.m_y));
+        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, m_grid.m_height - 1));
     }
 
     public List<GridIndex> GetPossibleExitsOnMap()
@@ -121,7 +121,7 @@ public class Room
         if (!m_exitList.Contains(roomExitIndex))
         {
             m_exitList.Add(roomExitIndex);
-            m_roomGrid.SetTileType(roomExitIndex, TileType.Exit);
+            m_grid.SetTileType(roomExitIndex, TileType.Exit);
         }
     }
 

@@ -35,9 +35,7 @@ public class LevelManager : MonoBehaviour
     {
         m_halfTileSize = m_tileSize / 2.0f;
 
-        m_mapGrid = new TileGrid();
-        m_mapGrid.m_width = m_levelWidth;
-        m_mapGrid.m_height = m_levelHight;
+        m_mapGrid = new TileGrid(m_levelWidth, m_levelHight);
         m_mapGrid.CreateTileGrid();
 
         if (m_mapGrid != null)
@@ -50,8 +48,37 @@ public class LevelManager : MonoBehaviour
                 m_rooms[i].GenerateRoom();
             }
 
-            StartCoroutine(CreateLevelBottomUp());
+            switch (FindObjectOfType<GameplayManager>().m_generationType)
+            {
+                case GenerationType.BottomUp:
+                    StartCoroutine(CreateLevelBottomUp());
+                    break;
+                case GenerationType.TopDown:
+                    StartCoroutine(CreateLevelTopDown());
+                    break;
+                default:
+                    break;
+            }
         }
+    }
+
+    IEnumerator CreateLevelTopDown()
+    {
+        GridArea root = new GridArea();
+
+        yield return StartCoroutine(TopDownGenerator.PlaceRooms(root, m_mapGrid, m_rooms));
+
+        TopDownGenerator.ConnectRooms(root, m_shortestRoomArcs);
+
+        TopDownGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_rooms);
+        TopDownGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
+
+        MeshGenerator meshGen = GetComponent<MeshGenerator>();
+        meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
+        CreateCeilingAndFloor();
+        SpawnPlayer();
+
+        yield return null;
     }
 
     IEnumerator CreateLevelBottomUp()
@@ -124,7 +151,7 @@ public class LevelManager : MonoBehaviour
         if (m_mapGrid != null)
         {
             DrawTileTypes();
-            //DrawMST();
+            DrawMST();
             DrawExitArcs();
 
             if (drawAllArcs)
