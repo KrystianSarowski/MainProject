@@ -9,9 +9,10 @@ public class GridArea
 
     public int m_width, m_height;
     public int m_childCountLeft, m_childCountRight;
+   
     public GridIndex m_startPos;
 
-    public Room m_room;
+    public RoomLayout m_layout;
 
     public GridArea m_parent;
     public GridArea[] m_children;
@@ -22,7 +23,7 @@ public class GridArea
         m_children = new GridArea[2];
         m_childCountLeft = 0;
         m_childCountRight = 0;
-        m_room = null;
+        m_layout = null;
     }
 
     public bool HasChildrean()
@@ -35,13 +36,13 @@ public class GridArea
         return false;
     }
 
-    public bool AddRoom(Room t_room)
+    public bool AddRoom(RoomLayout t_room)
     {
-        if (m_room == null && !HasChildrean())
+        if (m_layout == null && !HasChildrean())
         {
             if (t_room.m_grid.m_width + s_padding * 2 <= m_width && t_room.m_grid.m_height + s_padding * 2 <= m_height)
             {
-                m_room = t_room;
+                m_layout = t_room;
                 return true;
             }
         }
@@ -60,7 +61,7 @@ public class GridArea
         }
         else
         {
-            widths.Add(m_room.m_grid.m_width + s_padding * 2);
+            widths.Add(m_layout.m_grid.m_width + s_padding * 2);
             widths.Add(m_width - widths[0]);
         }
 
@@ -84,7 +85,7 @@ public class GridArea
         }
         else
         {
-            heights.Add(m_room.m_grid.m_height + s_padding * 2);
+            heights.Add(m_layout.m_grid.m_height + s_padding * 2);
             heights.Add(m_height - heights[0]);
         }
 
@@ -97,9 +98,9 @@ public class GridArea
         }
     }
 
-    bool ValidateSplitVarticaly(Room t_room)
+    bool ValidateSplitVarticaly(RoomLayout t_room)
     {
-        if (m_room.m_grid.m_width + t_room.m_grid.m_width + s_padding * 4 <= m_width)
+        if (m_layout.m_grid.m_width + t_room.m_grid.m_width + s_padding * 4 <= m_width)
         {
             if (m_height >= t_room.m_grid.m_height + s_padding * 2)
             {
@@ -110,9 +111,9 @@ public class GridArea
         return false;
     }
 
-    bool ValidateSplitHorizontaly(Room t_room)
+    bool ValidateSplitHorizontaly(RoomLayout t_room)
     {
-        if (m_room.m_grid.m_height + t_room.m_grid.m_height + s_padding * 4 <= m_height)
+        if (m_layout.m_grid.m_height + t_room.m_grid.m_height + s_padding * 4 <= m_height)
         {
             if (m_width >= t_room.m_grid.m_width + s_padding * 2)
             {
@@ -122,7 +123,7 @@ public class GridArea
         return false;
     }
 
-    public bool SplitAddRoom(Room t_room)
+    public bool SplitAddRoom(RoomLayout t_room)
     {
         bool canSplitVertical = false;
         bool canSplitHorizontal = false;
@@ -157,7 +158,7 @@ public class GridArea
             m_children[1] = new GridArea();
 
             if (m_width / 2 >= t_room.m_grid.m_width + s_padding * 2
-                && m_width / 2 >= m_room.m_grid.m_width + s_padding * 2)
+                && m_width / 2 >= m_layout.m_grid.m_width + s_padding * 2)
             {
                 SplitVerticaly(true);
             }
@@ -174,7 +175,7 @@ public class GridArea
             m_children[1] = new GridArea();
 
             if (m_height / 2 >= t_room.m_grid.m_height + s_padding * 2
-                && m_height / 2 >= m_room.m_grid.m_height + s_padding * 2)
+                && m_height / 2 >= m_layout.m_grid.m_height + s_padding * 2)
             {
                 SplitHorizontaly(true);
             }
@@ -187,10 +188,10 @@ public class GridArea
 
         if(canSplitHorizontal || canSplitVertical)
         {
-            m_children[0].m_room = m_room;
-            m_children[1].m_room = t_room;
+            m_children[0].m_layout = m_layout;
+            m_children[1].m_layout = t_room;
             UpdateChildCount();
-            m_room = null;
+            m_layout = null;
             return true;
         }
 
@@ -211,7 +212,7 @@ public class GridArea
 
 public class TopDownGenerator : MonoBehaviour
 {
-    public static IEnumerator PlaceRooms(GridArea t_root, TileGrid t_mapGrid, List<Room> t_roomsToPlace)
+    public static IEnumerator PlaceRooms(GridArea t_root, TileGrid t_mapGrid, List<RoomLayout> t_roomsToPlace)
     {
         t_root.m_startPos = new GridIndex(0, 0);
         t_root.m_width = t_mapGrid.m_width;
@@ -222,24 +223,25 @@ public class TopDownGenerator : MonoBehaviour
 
         while(index < t_roomsToPlace.Count && !noMoreSpace)
         {
-            if(!PlaceRoom(t_root, t_roomsToPlace[index]))
+            if(!PlaceRoomLayouts(t_root, t_roomsToPlace[index]))
             {
                 noMoreSpace = true;
             }
 
             else
             {
-                t_roomsToPlace[index].SetRoomID(index);
+                t_roomsToPlace[index].SetID(index);
+                t_roomsToPlace[index].m_roomAdded = true;
                 index++;
             }
         }
 
-        ConstructRoom(t_root, t_mapGrid);
+        TransferRoomLayouts(t_root, t_mapGrid);
 
         yield return null;
     }
 
-    static bool PlaceRoom(GridArea t_current, Room t_room)
+    static bool PlaceRoomLayouts(GridArea t_current, RoomLayout t_room)
     {
         if(t_current.AddRoom(t_room))
         {
@@ -252,12 +254,12 @@ public class TopDownGenerator : MonoBehaviour
             {
                 if (t_current.m_childCountLeft <= t_current.m_childCountRight)
                 {
-                    if (PlaceRoom(t_current.m_children[0], t_room))
+                    if (PlaceRoomLayouts(t_current.m_children[0], t_room))
                     {
                         return true;
                     }
 
-                    else if(PlaceRoom(t_current.m_children[1], t_room))
+                    else if(PlaceRoomLayouts(t_current.m_children[1], t_room))
                     {
                         return true;
                     }
@@ -265,12 +267,12 @@ public class TopDownGenerator : MonoBehaviour
 
                 else
                 {
-                    if (PlaceRoom(t_current.m_children[1], t_room))
+                    if (PlaceRoomLayouts(t_current.m_children[1], t_room))
                     {
                         return true;
                     }
 
-                    else if (PlaceRoom(t_current.m_children[0], t_room))
+                    else if (PlaceRoomLayouts(t_current.m_children[0], t_room))
                     {
                         return true;
                     }
@@ -289,25 +291,25 @@ public class TopDownGenerator : MonoBehaviour
         return false;
     }
 
-    static void ConstructRoom(GridArea t_current, TileGrid t_mapGrid)
+    static void TransferRoomLayouts(GridArea t_current, TileGrid t_mapGrid)
     {
-        if (t_current.m_room != null)
+        if (t_current.m_layout != null)
         {
-            TileGrid roomGrid = t_current.m_room.m_grid;
+            TileGrid roomGrid = t_current.m_layout.m_grid;
 
-            t_current.m_room.SetPositionIndex(new GridIndex(t_current.m_startPos.m_x + t_current.m_width / 2 - roomGrid.m_width / 2,
+            t_current.m_layout.SetPositionIndex(new GridIndex(t_current.m_startPos.m_x + t_current.m_width / 2 - roomGrid.m_width / 2,
                 t_current.m_startPos.m_y + t_current.m_height / 2 - roomGrid.m_height / 2));
 
             for (int x = 0; x < roomGrid.m_width; x++)
             {
-                GridIndex posOnMap = t_current.m_room.GetPositionIndex();
+                GridIndex posOnMap = t_current.m_layout.GetPositionIndex();
 
                 posOnMap.m_x = posOnMap.m_x + x;
 
                 for (int y = 0; y < roomGrid.m_height; y++)
                 {
                     t_mapGrid.SetTileType(posOnMap, roomGrid.GetTile(new GridIndex(x, y)).GetTileType());
-                    t_mapGrid.GetTile(posOnMap).SetOwnerID(t_current.m_room.GetRoomID());
+                    t_mapGrid.GetTile(posOnMap).SetOwnerID(t_current.m_layout.GetID());
 
                     posOnMap.m_y += 1;
                 }
@@ -318,19 +320,19 @@ public class TopDownGenerator : MonoBehaviour
         {
             for (int i = 0; i < 2; i++)
             {
-                ConstructRoom(t_current.m_children[i], t_mapGrid);
+                TransferRoomLayouts(t_current.m_children[i], t_mapGrid);
             }
         }
     }
 
-    public static List<Room> ConnectRooms(GridArea t_current, List<TileArc> t_nodeArcs)
+    public static List<RoomLayout> ConnectRooms(GridArea t_current, List<TileArc> t_nodeArcs)
     {
-        List<Room> rooms = new List<Room>();
+        List<RoomLayout> rooms = new List<RoomLayout>();
 
         if (t_current.HasChildrean())
         {
-            List<Room> leftRooms = ConnectRooms(t_current.m_children[0], t_nodeArcs);
-            List<Room> rightRooms = ConnectRooms(t_current.m_children[1], t_nodeArcs);
+            List<RoomLayout> leftRooms = ConnectRooms(t_current.m_children[0], t_nodeArcs);
+            List<RoomLayout> rightRooms = ConnectRooms(t_current.m_children[1], t_nodeArcs);
 
             TileArc tileArc = new TileArc();
 
@@ -354,13 +356,13 @@ public class TopDownGenerator : MonoBehaviour
 
         else
         {
-            rooms.Add(t_current.m_room);
+            rooms.Add(t_current.m_layout);
         }
 
         return rooms;
     }
 
-    public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<Room> t_rooms)
+    public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         List<GridIndex> possibleExits1;
         List<GridIndex> possibleExits2;
@@ -384,12 +386,12 @@ public class TopDownGenerator : MonoBehaviour
                 }
             }
 
-            exitArc.GetStartRoom().AddExitToRoom(exitArc.GetStartPos());
-            exitArc.GetTargetRoom().AddExitToRoom(exitArc.GetTargetPos());
+            exitArc.GetStartRoom().AddExitToLayout(exitArc.GetStartPos());
+            exitArc.GetTargetRoom().AddExitToLayout(exitArc.GetTargetPos());
             t_exitArcs.Add(exitArc);
         }
 
-        foreach (Room room in t_rooms)
+        foreach (RoomLayout room in t_rooms)
         {
             List<GridIndex> exitList = room.GetExitsOnMap();
 
@@ -476,4 +478,3 @@ public class TopDownGenerator : MonoBehaviour
         }
     }
 }
-

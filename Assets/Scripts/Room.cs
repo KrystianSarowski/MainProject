@@ -2,138 +2,99 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room
+public class Room : MonoBehaviour
 {
-    public TileGrid m_grid;
-    public List<TileArc> m_nodeArcs;
+    RoomLayout m_layout = null;
 
-    int m_roomID = -1;
-    public bool m_roomAdded = false;
+    //Has the room been cleared by the playeror not.
+    bool m_isCleared = false;
 
-    public GridIndex m_nodePosIndex;
-    GridIndex m_posIndex;
+    [SerializeField]
+    GameObject m_doorPrefab;
 
-    List<GridIndex> m_possibleExitList = new List<GridIndex>();
-    List<GridIndex> m_exitList = new List<GridIndex>();
+    List<GameObject> m_doors = new List<GameObject>();
 
-    bool m_isVisited = false;
-
-    public void GenerateRoom()
+    public void SetLayout(RoomLayout t_layout)
     {
-        m_grid = new TileGrid();
-        m_nodeArcs = new List<TileArc>();
-
-        m_grid.m_height = GameplayManager.s_seedRandom.Next(5, 15);
-        m_grid.m_width = GameplayManager.s_seedRandom.Next(5, 15);
-
-        m_grid.CreateTileGrid();
-        RandomFillRoom();
-
-        m_nodePosIndex = new GridIndex(m_grid.m_width / 2, m_grid.m_height / 2);
-        m_grid.SetTileType(m_nodePosIndex, TileType.Node);
-
-        CreatePossibleExits();
+        m_layout = t_layout;
     }
 
-    void RandomFillRoom()
+    public void ImplementLayout(float t_tileSize)
     {
-        for (int x = 0; x < m_grid.m_width; x++)
+        //The width of the layout minus the surrounding walls.
+        int width = m_layout.m_grid.m_width - 2;
+
+        //The height of the layout minus the surrounding walls.
+        int height = m_layout.m_grid.m_height - 2;
+
+        transform.localScale = new Vector3(width, 1, height);
+
+        GridIndex indexPos = m_layout.GetNodePositonOnMap();
+        Vector3 nodePos = new Vector3((indexPos.m_x + 0.5f) * t_tileSize, -1, (indexPos.m_y + 0.5f) * t_tileSize);
+        Vector3 position = nodePos;
+        
+        if(width % 2 == 0)
         {
-            for (int y = 0; y < m_grid.m_height; y++)
-            {
-                if (x == 0 || x == m_grid.m_width - 1 || y == 0 || y == m_grid.m_height - 1)
-                {
-                    m_grid.SetTileType(new GridIndex(x, y), TileType.Wall);
-                }
-                else
-                {
-                    m_grid.SetTileType(new GridIndex(x, y), TileType.Empty);
-                }
-            }
+            position.x -= 0.5f * t_tileSize;
+        }
+
+        if (height % 2 == 0)
+        {
+            position.z -= 0.5f * t_tileSize;
+        }
+
+        transform.position = position;
+
+        PlaceDoors(t_tileSize, nodePos);
+    }
+
+    void PlaceDoors(float t_tileSize, Vector3 t_nodePos)
+    {
+        Vector3 position = t_nodePos;
+
+        List<GridIndex> exitIndexPos = m_layout.GetExitsOnMap();
+
+        foreach (GridIndex exitIndex in exitIndexPos)
+        {
+            position.x = (exitIndex.m_x + 0.5f) * t_tileSize;
+            position.z = (exitIndex.m_y + 0.5f) * t_tileSize;
+
+            Vector3 dirVector = t_nodePos - position;
+            float angle = Vector3.Angle(dirVector, Vector3.forward);
+
+            GameObject door = Instantiate(m_doorPrefab, position, Quaternion.AngleAxis(angle, Vector3.up));
+            door.transform.SetParent(transform);
+            door.SetActive(false);
+
+            m_doors.Add(door);
         }
     }
 
-    public void SetRoomID(int t_newRoomID)
+    IEnumerator LockRoom()
     {
-        m_roomID = t_newRoomID;
-    }
-
-    public int GetRoomID()
-    {
-        return m_roomID;
-    }
-
-    public void SetPositionIndex(GridIndex t_newPosIndex)
-    {
-        m_posIndex = t_newPosIndex;
-    }
-
-    public GridIndex GetPositionIndex()
-    {
-        return m_posIndex;
-    }
-
-    public GridIndex GetNodePositonOnMap()
-    {
-        return new GridIndex(m_posIndex.m_x + m_nodePosIndex.m_x, m_posIndex.m_y + m_nodePosIndex.m_y); 
-    }
-
-    public void AddArc(Room t_newRoom)
-    {
-        m_nodeArcs.Add(new TileArc(this, t_newRoom));
-    }
-
-    public void SetIsVisited(bool t_isVisited)
-    {
-        m_isVisited = t_isVisited;
-    }
-
-    public bool GetIsVisited()
-    {
-        return m_isVisited;
-    }
-
-    void CreatePossibleExits()
-    {
-        m_possibleExitList.Add(new GridIndex(0, m_nodePosIndex.m_y));
-        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, 0));
-        m_possibleExitList.Add(new GridIndex(m_grid.m_width - 1, m_nodePosIndex.m_y));
-        m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, m_grid.m_height - 1));
-    }
-
-    public List<GridIndex> GetPossibleExitsOnMap()
-    {
-        List<GridIndex> possibleExitsOnMap = new List<GridIndex>();
-
-        foreach (GridIndex exit in m_possibleExitList)
+        foreach(GameObject door in m_doors)
         {
-            possibleExitsOnMap.Add(new GridIndex(exit.m_x + m_posIndex.m_x, exit.m_y + m_posIndex.m_y));
+            door.SetActive(true);
         }
 
-        return possibleExitsOnMap;
-    }
+        yield return new WaitForSeconds(5.0f);
 
-    public void AddExitToRoom(GridIndex t_exitOnMapIndex)
-    {
-        GridIndex roomExitIndex = new GridIndex(t_exitOnMapIndex.m_x - m_posIndex.m_x,
-            t_exitOnMapIndex.m_y - m_posIndex.m_y);
-
-        if (!m_exitList.Contains(roomExitIndex))
+        foreach (GameObject door in m_doors)
         {
-            m_exitList.Add(roomExitIndex);
-            m_grid.SetTileType(roomExitIndex, TileType.Exit);
-        }
-    }
-
-    public List<GridIndex> GetExitsOnMap()
-    {
-        List<GridIndex> exitsOnMap = new List<GridIndex>();
-
-        foreach (GridIndex exit in m_exitList)
-        {
-            exitsOnMap.Add(new GridIndex(exit.m_x + m_posIndex.m_x, exit.m_y + m_posIndex.m_y));
+            door.SetActive(false);
         }
 
-        return exitsOnMap;
+        m_isCleared = true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(!m_isCleared)
+        {
+           if(other.tag == "Player")
+           {
+                StartCoroutine(LockRoom());
+           }
+        }
     }
 }

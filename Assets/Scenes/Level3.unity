@@ -169,9 +169,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_playerPrefab: {fileID: 8541690948009524850, guid: eeb2388182d50604596538486a3114fd,
     type: 3}
-  m_numOfRooms: 80
-  m_levelWidth: 120
-  m_levelHight: 120
+  m_exitPrefab: {fileID: 6463290110360236839, guid: 3ccd5928e65e1884db3a3c3341b0ba1a,
+    type: 3}
+  m_roomPrefab: {fileID: 6041474226846552186, guid: 54926a96e979ecd4fa4f6c01f5aefb2c,
+    type: 3}
+  m_numOfRooms: 30
+  m_levelWidth: 90
+  m_levelHight: 90
   m_tileSize: 1
   m_wallHeight: 2
   m_floorMaterial: {fileID: 2100000, guid: 8d530ffe6c4968843806085897955b9d, type: 2}

@@ -13,6 +13,11 @@ public class PlayerController : MonoBehaviour
     //The rigid body of the player.
     private Rigidbody m_rb;
 
+    [Range(0.1f, 5.0f)]
+    public float m_jumpVelocity = 3.5f;
+
+    bool m_isFalling;
+
     //Start is called before the first frame update
     void Start()
     {
@@ -29,6 +34,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Move();
+        Jump();
     }
 
     void Move()
@@ -60,5 +66,25 @@ public class PlayerController : MonoBehaviour
             velocity = velocity.normalized * m_maxSpeed;
             m_rb.velocity = new Vector3(velocity.x, m_rb.velocity.y, velocity.y);
         } 
+    }
+
+    void Jump()
+    {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            if(!m_isFalling)
+            {
+                m_rb.velocity += Vector3.up * m_jumpVelocity;
+                m_isFalling = true;
+            }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Ground")
+        {
+            m_isFalling = false;
+        }
     }
 }

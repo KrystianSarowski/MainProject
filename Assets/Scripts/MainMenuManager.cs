@@ -80,4 +80,9 @@ public class MainMenuManager : MonoBehaviour
     {
         FindObjectOfType<GameplayManager>().m_generationType = GenerationType.BottomUp;
     }
+
+    public void LoadFirstLevel()
+    {
+        FindObjectOfType<GameplayManager>().LoadFirstLevel();
+    }
 }

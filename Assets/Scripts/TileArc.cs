@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class TileArc
 {
-    Room m_startRoom;
-    Room m_targetRoom;
+    RoomLayout m_startRoom;
+    RoomLayout m_targetRoom;
 
     GridIndex m_startPos;
     GridIndex m_targetPos;
@@ -20,7 +20,7 @@ public class TileArc
         m_weight = 999999;
     }
 
-    public TileArc(Room t_start, Room t_target)
+    public TileArc(RoomLayout t_start, RoomLayout t_target)
     {
         m_startRoom = t_start;
         m_targetRoom = t_target;
@@ -54,12 +54,12 @@ public class TileArc
         return m_targetPos;
     }
 
-    public Room GetStartRoom()
+    public RoomLayout GetStartRoom()
     {
         return m_startRoom;
     }
 
-    public Room GetTargetRoom()
+    public RoomLayout GetTargetRoom()
     {
         return m_targetRoom;
     }

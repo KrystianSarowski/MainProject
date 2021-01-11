@@ -10,14 +10,15 @@ public struct GenerationStats
     public float m_shortestTime;
     public float m_longestTime;
 
-    public float m_avergeTileUse;
+    public int m_avergeRoomsPlaced;
+    public int m_mostRoomsPlaced;
+    public int m_leastRoomsPlaced;
 }
 
 public class HeatSceneManager : MonoBehaviour
 {
     List<TileGrid> m_mapGrids;
-
-    List<List<Room>> m_roomLists;
+    List<List<RoomLayout>> m_roomLists;
 
     public GameObject m_heatTile;
 
@@ -32,6 +33,7 @@ public class HeatSceneManager : MonoBehaviour
 
     GameObject[,] m_tilesBottomUp;
     GameObject[,] m_tilesTopDown;
+    GameObject m_camera;
 
     Canvas m_canvas;
 
@@ -41,9 +43,13 @@ public class HeatSceneManager : MonoBehaviour
     GenerationStats m_bottomUpStats;
     GenerationStats m_topDownStats;
 
+    public List<TMP_Text> m_bottomUpStatsText;
+    public List<TMP_Text> m_topDownStatsText;
+
     private void Start()
     {
-        m_canvas = FindObjectOfType<Canvas>();
+        m_canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
+        m_camera = GameObject.FindGameObjectWithTag("MainCamera");
 
         m_heatMapBottomUp = new int[m_levelWidth, m_levelHight];
         m_tilesBottomUp = new GameObject[m_levelWidth, m_levelHight];
@@ -70,13 +76,13 @@ public class HeatSceneManager : MonoBehaviour
         }
 
         m_mapGrids = new List<TileGrid>();
-        m_roomLists = new List<List<Room>>();
+        m_roomLists = new List<List<RoomLayout>>();
 
         m_mapGrids.Add(new TileGrid());
         m_mapGrids.Add(new TileGrid());
 
-        m_roomLists.Add(new List<Room>());
-        m_roomLists.Add(new List<Room>());
+        m_roomLists.Add(new List<RoomLayout>());
+        m_roomLists.Add(new List<RoomLayout>());
 
         StartCoroutine(GenerateHeatMapBottomUp());
         StartCoroutine(GenerateHeatMapTopDown());
@@ -94,6 +100,8 @@ public class HeatSceneManager : MonoBehaviour
 
         float mapsGenerated = 0;
         m_bottomUpStats.m_shortestTime = 10000.0f;
+        m_bottomUpStats.m_leastRoomsPlaced = 1000;
+        UpdateStatsText(m_bottomUpStatsText, m_bottomUpStats);
 
         while (mapsGenerated != m_mapsToGenerate)
         {
@@ -102,13 +110,13 @@ public class HeatSceneManager : MonoBehaviour
             m_mapGrids[0] = new TileGrid(m_levelWidth, m_levelHight);
             m_mapGrids[0].CreateTileGrid();
 
-            m_roomLists[0] = new List<Room>();
+            m_roomLists[0] = new List<RoomLayout>();
 
             for (int i = 0; i < m_numOfRooms; i++)
             {
-                m_roomLists[0].Add(new Room());
-                m_roomLists[0][i].SetRoomID(i);
-                m_roomLists[0][i].GenerateRoom();
+                m_roomLists[0].Add(new RoomLayout());
+                m_roomLists[0][i].SetID(i);
+                m_roomLists[0][i].GenerateLayout();
             }
 
             yield return StartCoroutine(CreateLevelBottomUp());
@@ -116,10 +124,13 @@ public class HeatSceneManager : MonoBehaviour
             float finishTime = Time.time;
 
             mapsGenerated = UpdateHeatMap(mapsGenerated, m_mapGrids[0], m_heatMapBottomUp, m_tilesBottomUp);
-            m_bottomUpStats = UpdateStats(mapsGenerated, finishTime - startTime, m_bottomUpStats);
+            m_bottomUpStats = UpdateTimeStats(mapsGenerated, finishTime - startTime, m_bottomUpStats);
+            m_bottomUpStats = UpdatePlacementStats(mapsGenerated, m_roomLists[0], m_bottomUpStats);
+            UpdateStatsText(m_bottomUpStatsText, m_bottomUpStats);
         }
 
         Debug.Log(m_bottomUpStats.m_avergeTime);
+        Debug.Log(m_bottomUpStats.m_avergeRoomsPlaced);
     }
 
     IEnumerator GenerateHeatMapTopDown()
@@ -134,6 +145,8 @@ public class HeatSceneManager : MonoBehaviour
 
         float mapsGenerated = 0;
         m_topDownStats.m_shortestTime = 10000.0f;
+        m_topDownStats.m_leastRoomsPlaced = 1000;
+        UpdateStatsText(m_topDownStatsText, m_topDownStats);
 
         while (mapsGenerated != m_mapsToGenerate)
         {
@@ -141,14 +154,13 @@ public class HeatSceneManager : MonoBehaviour
 
             m_mapGrids[1] = new TileGrid(m_levelWidth, m_levelHight);
             m_mapGrids[1].CreateTileGrid();
-
-            m_roomLists[1] = new List<Room>();
+            m_roomLists[1] = new List<RoomLayout>();
 
             for (int i = 0; i < m_numOfRooms; i++)
             {
-                m_roomLists[1].Add(new Room());
-                m_roomLists[1][i].SetRoomID(i);
-                m_roomLists[1][i].GenerateRoom();
+                m_roomLists[1].Add(new RoomLayout());
+                m_roomLists[1][i].SetID(i);
+                m_roomLists[1][i].GenerateLayout();
             }
 
             yield return StartCoroutine(CreateLevelTopDown());
@@ -156,13 +168,16 @@ public class HeatSceneManager : MonoBehaviour
             float finishTime = Time.time;
 
             mapsGenerated = UpdateHeatMap(mapsGenerated, m_mapGrids[1], m_heatMapTopDown, m_tilesTopDown);
-            m_topDownStats = UpdateStats(mapsGenerated, finishTime - startTime, m_topDownStats);          
+            m_topDownStats = UpdateTimeStats(mapsGenerated, finishTime - startTime, m_topDownStats);   
+            m_topDownStats = UpdatePlacementStats(mapsGenerated, m_roomLists[1], m_topDownStats);
+            UpdateStatsText(m_topDownStatsText, m_topDownStats);
         }
 
         Debug.Log(m_topDownStats.m_avergeTime);
+        Debug.Log(m_topDownStats.m_avergeRoomsPlaced);
     }
 
-    public GenerationStats UpdateStats(float t_mapsGenerated, float t_elapsedTime, GenerationStats t_stats)
+    GenerationStats UpdateTimeStats(float t_mapsGenerated, float t_elapsedTime, GenerationStats t_stats)
     {
         if(t_stats.m_longestTime < t_elapsedTime)
         {
@@ -177,6 +192,44 @@ public class HeatSceneManager : MonoBehaviour
         t_stats.m_avergeTime = (t_stats.m_avergeTime * (t_mapsGenerated - 1) + t_elapsedTime) / t_mapsGenerated;
 
         return t_stats;
+    }
+
+    GenerationStats UpdatePlacementStats(float t_mapsGenerated, List<RoomLayout> t_rooms, GenerationStats t_stats)
+    {
+        int count;
+
+        for(count = 0; count < t_rooms.Count; count++)
+        {
+            if(!t_rooms[count].m_roomAdded)
+            {
+                break;
+            }
+        }
+
+        if (t_stats.m_mostRoomsPlaced < count)
+        {
+            t_stats.m_mostRoomsPlaced = count;
+        }
+
+        if (t_stats.m_leastRoomsPlaced > count)
+        {
+            t_stats.m_leastRoomsPlaced = count;
+        }
+
+        t_stats.m_avergeRoomsPlaced = (int)((t_stats.m_avergeRoomsPlaced * (t_mapsGenerated - 1) + count) / t_mapsGenerated);
+
+        return t_stats;
+    }
+
+    void UpdateStatsText(List<TMP_Text> t_statsText, GenerationStats t_stats)
+    {
+        t_statsText[0].text = "Average Time: " + t_stats.m_avergeTime.ToString("F3") + "s";
+        t_statsText[1].text = "Shortest Time: " + t_stats.m_shortestTime.ToString("F3") + "s";
+        t_statsText[2].text = "Longest Time: " + t_stats.m_longestTime.ToString("F3") + "s";
+
+        t_statsText[3].text = "Average Rooms Placed: " + t_stats.m_avergeRoomsPlaced + "/" + m_numOfRooms;
+        t_statsText[4].text = "Least Rooms Placed: " + t_stats.m_leastRoomsPlaced + "/" + m_numOfRooms;
+        t_statsText[5].text = "Most Rooms Placed: " + t_stats.m_mostRoomsPlaced + "/" + m_numOfRooms;
     }
 
     float UpdateHeatMap(float t_mapsGenerated, TileGrid t_grid, int[,] t_heatMap, GameObject[,] t_tileMap)
@@ -232,5 +285,33 @@ public class HeatSceneManager : MonoBehaviour
         TopDownGenerator.CreateCorridors(exitArcs, m_mapGrids[1]);
 
         yield return null;
+    }
+
+    private void Update()
+    {
+        m_camera.transform.Translate(Vector3.up * Input.GetAxis("Mouse ScrollWheel") * 1000);
+
+        if (m_camera.transform.position.y > -1900.0f)
+        {
+            Vector3 pos = m_camera.transform.position;
+
+            pos.y = -1900.0f;
+
+            m_camera.transform.position = pos;
+        }
+
+        else if (m_camera.transform.position.y < -6000.0f)
+        {
+            Vector3 pos = m_camera.transform.position;
+
+            pos.y = -6000.0f;
+
+            m_camera.transform.position = pos;
+        }
+    }
+
+    public void Return()
+    {
+        GameplayManager.LoadScene("MenuScene");
     }
 }

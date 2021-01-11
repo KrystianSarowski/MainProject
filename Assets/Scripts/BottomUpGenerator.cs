@@ -5,7 +5,7 @@ using System.Linq;
 
 public class BottomUpGenerator
 {
-    public static IEnumerator PlaceRooms(TileGrid t_mapGrid, List<Room> t_roomsToPlace)
+    public static IEnumerator PlaceRooms(TileGrid t_mapGrid, List<RoomLayout> t_roomsToPlace)
     {
         int roomIndex = 0;
         int safeLockCount = 0;
@@ -21,7 +21,8 @@ public class BottomUpGenerator
             if (ValidatePlacement(position, roomGrid.m_width, roomGrid.m_height, t_mapGrid))
             {
                 t_roomsToPlace[roomIndex].SetPositionIndex(position);
-                t_roomsToPlace[roomIndex].SetRoomID(roomIndex);
+                t_roomsToPlace[roomIndex].SetID(roomIndex);
+                t_roomsToPlace[roomIndex].m_roomAdded = true;
 
                 for (int x = 0; x < roomGrid.m_width; x++)
                 {
@@ -33,7 +34,7 @@ public class BottomUpGenerator
                         posOnMap.m_y = position.m_y + y;
 
                         t_mapGrid.SetTileType(posOnMap, roomGrid.GetTile(new GridIndex(x, y)).GetTileType());
-                        t_mapGrid.GetTile(posOnMap).SetOwnerID(t_roomsToPlace[roomIndex].GetRoomID());
+                        t_mapGrid.GetTile(posOnMap).SetOwnerID(t_roomsToPlace[roomIndex].GetID());
                     }
                 }
 
@@ -73,7 +74,7 @@ public class BottomUpGenerator
         return canBePlaced;
     }
 
-    public static void CreateRoomArcs(TileGrid t_mapGrid, List<Room> t_rooms)
+    public static void CreateRoomArcs(TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         int curRoomID;
         int prevRoomID;
@@ -127,7 +128,7 @@ public class BottomUpGenerator
         }
     }
 
-    public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<Room> t_rooms)
+    public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         List<GridIndex> possibleExits1;
         List<GridIndex> possibleExits2;
@@ -151,12 +152,12 @@ public class BottomUpGenerator
                 }
             }
 
-            exitArc.GetStartRoom().AddExitToRoom(exitArc.GetStartPos());
-            exitArc.GetTargetRoom().AddExitToRoom(exitArc.GetTargetPos());
+            exitArc.GetStartRoom().AddExitToLayout(exitArc.GetStartPos());
+            exitArc.GetTargetRoom().AddExitToLayout(exitArc.GetTargetPos());
             t_exitArcs.Add(exitArc);
         }
 
-        foreach (Room room in t_rooms)
+        foreach (RoomLayout room in t_rooms)
         {
             List<GridIndex> exitList = room.GetExitsOnMap();
 
@@ -243,9 +244,9 @@ public class BottomUpGenerator
         }
     }
 
-    public static List<TileArc> CreateMST(List<Room> t_rooms)
+    public static List<TileArc> CreateMST(List<RoomLayout> t_rooms)
     {
-        foreach (Room room in t_rooms)
+        foreach (RoomLayout room in t_rooms)
         {
             room.SetIsVisited(false);
         }

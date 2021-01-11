@@ -7,11 +7,14 @@ public class LevelManager : MonoBehaviour
 {
     TileGrid m_mapGrid;
 
+    List<RoomLayout> m_layouts;
     List<Room> m_rooms;
     List<TileArc> m_shortestRoomArcs = new List<TileArc>();
     List<TileArc> m_exitArcs = new List<TileArc>();
 
     public GameObject m_playerPrefab;
+    public GameObject m_exitPrefab;
+    public GameObject m_roomPrefab;
 
     public int m_numOfRooms = 40;
     public int m_levelWidth;
@@ -40,12 +43,12 @@ public class LevelManager : MonoBehaviour
 
         if (m_mapGrid != null)
         {
-            m_rooms = new List<Room>();
+            m_layouts = new List<RoomLayout>();
 
             for(int i =0; i < m_numOfRooms; i++)
             {
-                m_rooms.Add(new Room());
-                m_rooms[i].GenerateRoom();
+                m_layouts.Add(new RoomLayout());
+                m_layouts[i].GenerateLayout();
             }
 
             switch (FindObjectOfType<GameplayManager>().m_generationType)
@@ -66,36 +69,40 @@ public class LevelManager : MonoBehaviour
     {
         GridArea root = new GridArea();
 
-        yield return StartCoroutine(TopDownGenerator.PlaceRooms(root, m_mapGrid, m_rooms));
+        yield return StartCoroutine(TopDownGenerator.PlaceRooms(root, m_mapGrid, m_layouts));
 
         TopDownGenerator.ConnectRooms(root, m_shortestRoomArcs);
 
-        TopDownGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_rooms);
+        TopDownGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         TopDownGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
         MeshGenerator meshGen = GetComponent<MeshGenerator>();
         meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
         CreateCeilingAndFloor();
         SpawnPlayer();
+        SpawnExit();
+        BuildRooms();
 
         yield return null;
     }
 
     IEnumerator CreateLevelBottomUp()
     {
-        yield return StartCoroutine(BottomUpGenerator.PlaceRooms(m_mapGrid, m_rooms));
+        yield return StartCoroutine(BottomUpGenerator.PlaceRooms(m_mapGrid, m_layouts));
 
-        BottomUpGenerator.CreateRoomArcs(m_mapGrid, m_rooms);
+        BottomUpGenerator.CreateRoomArcs(m_mapGrid, m_layouts);
 
-        m_shortestRoomArcs = BottomUpGenerator.CreateMST(m_rooms);
+        m_shortestRoomArcs = BottomUpGenerator.CreateMST(m_layouts);
 
-        BottomUpGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_rooms);
+        BottomUpGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         BottomUpGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
         MeshGenerator meshGen = GetComponent<MeshGenerator>();
         meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
         CreateCeilingAndFloor();
         SpawnPlayer();
+        SpawnExit();
+        BuildRooms();
 
         yield return null;
     }
@@ -111,6 +118,7 @@ public class LevelManager : MonoBehaviour
         floor.AddComponent<MeshCollider>();
         m_floorMaterial.mainTextureScale = new Vector2(m_levelWidth, m_levelHight);
         floor.GetComponent<Renderer>().material = m_floorMaterial;
+        floor.tag = "Ground";
 
         GameObject ceiling = GameObject.CreatePrimitive(PrimitiveType.Plane);
         ceiling.transform.position = new Vector3(m_levelWidth * positionScalar, 0, m_levelHight * positionScalar);
@@ -123,12 +131,11 @@ public class LevelManager : MonoBehaviour
 
     public void SpawnPlayer()
     {
-        GridIndex nodeIndex = m_rooms[0].GetNodePositonOnMap();
+        GridIndex nodeIndex = m_layouts[0].GetNodePositonOnMap();
 
         Vector3 spawnPosition = new Vector3(nodeIndex.m_x * m_tileSize + m_halfTileSize, -m_wallHeight / 2.0f, nodeIndex.m_y * m_tileSize + m_halfTileSize);
 
         Instantiate(m_playerPrefab, spawnPosition, Quaternion.identity);
-        m_rooms[0].GetNodePositonOnMap();
     }
 
     private void Update()
@@ -150,7 +157,7 @@ public class LevelManager : MonoBehaviour
     {
         if (m_mapGrid != null)
         {
-            DrawTileTypes();
+            //DrawTileTypes();
             DrawMST();
             DrawExitArcs();
 
@@ -245,9 +252,9 @@ public class LevelManager : MonoBehaviour
 
     void DrawConnectionArcs()
     {
-        foreach (Room room in m_rooms)
+        foreach (RoomLayout room in m_layouts)
         {
-            if (room.GetRoomID() != -1)
+            if (room.GetID() != -1)
             {
                 List<TileArc> arcs = room.m_nodeArcs;
 
@@ -270,6 +277,40 @@ public class LevelManager : MonoBehaviour
                     Gizmos.color = Color.blue;
                     Gizmos.DrawLine(conRoomPos, roomPos);
                 }
+            }
+        }
+    }
+
+    void SpawnExit()
+    {
+        int index = 0;
+
+        for(int i = 0; i < m_layouts.Count(); i++)
+        {
+            if(m_layouts[i].m_roomAdded == true)
+            {
+                index = i;
+            }
+        }
+
+        GridIndex nodeIndex = m_layouts[index].GetNodePositonOnMap();
+
+        Vector3 spawnPosition = new Vector3(nodeIndex.m_x * m_tileSize + m_halfTileSize, -m_wallHeight + 0.005f, nodeIndex.m_y * m_tileSize + m_halfTileSize);
+        
+        GameObject exitObject = Instantiate(m_exitPrefab, spawnPosition, Quaternion.identity);
+
+        exitObject.transform.Rotate(Vector3.right * -90);
+    }
+
+    void BuildRooms()
+    {
+        foreach(RoomLayout layout in m_layouts)
+        {
+            if(layout.m_roomAdded)
+            {
+                GameObject room = Instantiate(m_roomPrefab, transform);
+                room.GetComponent<Room>().SetLayout(layout);
+                room.GetComponent<Room>().ImplementLayout(m_tileSize);
             }
         }
     }

@@ -13,6 +13,12 @@ public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager s_instance;
 
+    [HideInInspector]
+    public static string s_seedString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+
+    [HideInInspector]
+    public static System.Random s_seedRandom;
+
     public GenerationType m_generationType;
 
     public string m_seed;
@@ -20,10 +26,7 @@ public class GameplayManager : MonoBehaviour
     [HideInInspector]
     public const int m_MAX_SEED_SIZE = 6;
 
-    public static System.Random s_seedRandom;
-
-    [HideInInspector]
-    public static string s_seedString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    int m_currentLevel;
 
     void Awake()
     {
@@ -63,6 +66,28 @@ public class GameplayManager : MonoBehaviour
     {
         m_seed = t_cutomSeed;
         s_seedRandom = new System.Random(m_seed.GetHashCode());
+    }
+
+    public void LoadFirstLevel()
+    {
+        m_currentLevel = 1;
+
+        LoadScene("Level" + m_currentLevel);
+    }
+
+    public void LoadNextLevel()
+    {
+        m_currentLevel++;
+
+        if (m_currentLevel > 3)
+        {
+            LoadScene("MenuScene");
+        }
+
+        else
+        {
+            LoadScene("Level" + m_currentLevel);
+        }
     }
 
     public static void LoadScene(string t_string)
