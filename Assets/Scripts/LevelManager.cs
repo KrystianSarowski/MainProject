@@ -63,6 +63,8 @@ public class LevelManager : MonoBehaviour
                     break;
             }
         }
+
+        GameplayManager.s_levelLoading = false;
     }
 
     IEnumerator CreateLevelTopDown()

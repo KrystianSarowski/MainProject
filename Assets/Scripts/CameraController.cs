@@ -21,11 +21,11 @@ public class CameraController : MonoBehaviour
         m_player = transform.parent.gameObject;
 
         transform.rotation = Quaternion.identity;
-        transform.localPosition = new Vector3(0, 0.6f, 0);
+        transform.localPosition = new Vector3(0, 0.4f, 0);
     }
 
     //Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         if(m_player != null)
         {
@@ -37,6 +37,8 @@ public class CameraController : MonoBehaviour
             m_changeInMousePosition.y = Mathf.Lerp(m_changeInMousePosition.y, newChangeVector.y, 1 / m_sensetiivity);
 
             m_mousePosition += m_changeInMousePosition;
+
+            m_mousePosition.y = Mathf.Clamp(m_mousePosition.y, -90f, 90f);
 
             transform.localRotation = Quaternion.AngleAxis(-m_mousePosition.y, Vector3.right);
 

@@ -9,10 +9,35 @@ public class Room : MonoBehaviour
     //Has the room been cleared by the playeror not.
     bool m_isCleared = false;
 
+    bool m_isLocked = false;
+
     [SerializeField]
     GameObject m_doorPrefab;
 
+    [SerializeField]
+    GameObject m_enemyPrefab;
+
     List<GameObject> m_doors = new List<GameObject>();
+    List<GameObject> m_enemies = new List<GameObject>();
+
+    void Update()
+    {
+        if(m_isLocked)
+        {
+            for (var i = m_enemies.Count - 1; i > -1; i--)
+            {
+                if (m_enemies[i] == null)
+                {
+                    m_enemies.RemoveAt(i);
+                }
+            }
+
+            if(m_enemies.Count == 0)
+            {
+                UnlockRoom();
+            }
+        }
+    }
 
     public void SetLayout(RoomLayout t_layout)
     {
@@ -27,9 +52,10 @@ public class Room : MonoBehaviour
         //The height of the layout minus the surrounding walls.
         int height = m_layout.m_grid.m_height - 2;
 
-        transform.localScale = new Vector3(width, 1, height);
+        GetComponent<BoxCollider>().size = new Vector3(width, 2, height);
 
         GridIndex indexPos = m_layout.GetNodePositonOnMap();
+        
         Vector3 nodePos = new Vector3((indexPos.m_x + 0.5f) * t_tileSize, -1, (indexPos.m_y + 0.5f) * t_tileSize);
         Vector3 position = nodePos;
         
@@ -70,30 +96,58 @@ public class Room : MonoBehaviour
         }
     }
 
-    IEnumerator LockRoom()
+    void UnlockRoom()
     {
-        foreach(GameObject door in m_doors)
-        {
-            door.SetActive(true);
-        }
-
-        yield return new WaitForSeconds(5.0f);
-
         foreach (GameObject door in m_doors)
         {
             door.SetActive(false);
         }
 
         m_isCleared = true;
+        m_isLocked = false;
+    }    
+
+    void LockRoom()
+    {
+        SpawnEnemies();
+
+        foreach(GameObject door in m_doors)
+        {
+            door.SetActive(true);
+        }
+
+        m_isLocked = true;
+    }
+
+    void SpawnEnemies()
+    {
+        Vector3 roomScale = GetComponent<BoxCollider>().size;
+        roomScale.x = roomScale.x / 2;
+        roomScale.z = roomScale.z / 2;
+        roomScale.y = roomScale.y / 2;
+
+        for(int i = 0; i < 3; i++)
+        {
+            Vector3 spawnPos = transform.position;
+
+            spawnPos.x += Random.Range(-roomScale.x, roomScale.x);
+            spawnPos.z += Random.Range(-roomScale.z, roomScale.z);
+            spawnPos.y += -roomScale.y + (m_enemyPrefab.transform.localScale.y / 2);
+
+            GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
+            enemy.GetComponent<Enemy>().SetRoomDimensions(transform.position, roomScale);
+            //enemy.transform.SetParent(transform);
+            m_enemies.Add(enemy);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(!m_isCleared)
+        if(!m_isCleared && !m_isLocked)
         {
            if(other.tag == "Player")
            {
-                StartCoroutine(LockRoom());
+                LockRoom();
            }
         }
     }

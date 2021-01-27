@@ -10,13 +10,26 @@ public class PlayerController : MonoBehaviour
     [Range(0.1f, 10.0f)]
     public float m_maxSpeed = 5.0f;     //The max speed at which the player can travel.
 
-    //The rigid body of the player.
-    private Rigidbody m_rb;
-
     [Range(0.1f, 5.0f)]
     public float m_jumpVelocity = 3.5f;
 
+    float m_attackDelay = 0.5f;
+
+    int m_health = 100;
+
+    [SerializeField]
+    Transform m_attackHitBox;
+
+    //The rigid body of the player.
+    Rigidbody m_rb;
+
+    [SerializeField]
+    GameObject m_sword;
+
+    PlayerUI m_playerUI;
+
     bool m_isFalling;
+    bool m_isAttacking;
 
     //Start is called before the first frame update
     void Start()
@@ -28,6 +41,10 @@ public class PlayerController : MonoBehaviour
         camera.transform.parent = gameObject.transform;
 
         camera.GetComponent<CameraController>().AttachPlayer();
+
+        m_sword.transform.SetParent(camera.transform);
+
+        m_playerUI = GetComponent<PlayerUI>();
     }
 
     //Update is called once per frame
@@ -35,6 +52,14 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         Jump();
+
+        if(Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            if(!m_isAttacking)
+            {
+                StartCoroutine(attack());
+            }
+        }
     }
 
     void Move()
@@ -68,6 +93,19 @@ public class PlayerController : MonoBehaviour
         } 
     }
 
+    public void TakeDamage(int t_incomingDamage)
+    {
+        m_health -= t_incomingDamage;
+
+        if(m_health < 0)
+        {
+            m_health = 0;
+            //GameplayManager.LoadScene("GameoverScene");
+        }
+
+        m_playerUI.UpdateHealthBar(m_health);
+    }
+
     void Jump()
     {
         if (Input.GetKey(KeyCode.Space))
@@ -78,6 +116,30 @@ public class PlayerController : MonoBehaviour
                 m_isFalling = true;
             }
         }
+    }
+
+    IEnumerator attack()
+    {
+        m_isAttacking = true;
+
+        m_sword.GetComponent<Sword>().StartAttack();
+
+        Vector3 hitBoxSize = new Vector3(0.6f, 1.0f, 1.0f);
+
+        Collider[] hitColliders = Physics.OverlapBox(m_attackHitBox.position, hitBoxSize / 2, m_attackHitBox.rotation);
+
+        for(int i = 0; i < hitColliders.Length; i++)
+        {
+            if(hitColliders[i].tag == "Enemy")
+            {
+               hitColliders[i].GetComponent<Enemy>().PushBack(transform.position);
+               hitColliders[i].GetComponent<Enemy>().TakeDamage(10);
+            }
+        }
+
+        yield return new WaitForSeconds(m_attackDelay);
+
+        m_isAttacking = false;
     }
 
     private void OnCollisionEnter(Collision collision)

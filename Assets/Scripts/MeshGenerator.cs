@@ -116,6 +116,7 @@ public class MeshGenerator : MonoBehaviour
 
         MeshCollider wallsCollider = m_walls.gameObject.AddComponent<MeshCollider>();
         wallsCollider.sharedMesh = m_walls.mesh;
+        m_walls.tag = "Walls";
     }
 
     void TriangulateSquare(Square square)

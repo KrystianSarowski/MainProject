@@ -59,3 +59,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_doorPrefab: {fileID: 8965023245911757771, guid: 7c2642fbe0f6bfe42888653cff9a549d,
     type: 3}
+  m_enemyPrefab: {fileID: 6063363458670044145, guid: ae53586334677254b98a0f2ee8247679,
+    type: 3}

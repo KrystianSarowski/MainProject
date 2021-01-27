@@ -28,6 +28,8 @@ public class GameplayManager : MonoBehaviour
 
     int m_currentLevel;
 
+    public static bool s_levelLoading = false;
+
     void Awake()
     {
         //Makes sure there is only one Gameplay manager
@@ -70,6 +72,7 @@ public class GameplayManager : MonoBehaviour
 
     public void LoadFirstLevel()
     {
+        s_levelLoading = false;
         m_currentLevel = 1;
 
         LoadScene("Level" + m_currentLevel);
@@ -77,16 +80,19 @@ public class GameplayManager : MonoBehaviour
 
     public void LoadNextLevel()
     {
-        m_currentLevel++;
-
-        if (m_currentLevel > 3)
+        if(!s_levelLoading)
         {
-            LoadScene("MenuScene");
-        }
+            m_currentLevel++;
 
-        else
-        {
-            LoadScene("Level" + m_currentLevel);
+            if (m_currentLevel > 3)
+            {
+                LoadScene("MenuScene");
+            }
+
+            else
+            {
+                LoadScene("Level" + m_currentLevel);
+            }
         }
     }
 

@@ -24,7 +24,7 @@ public class HeatSceneManager : MonoBehaviour
 
     public int m_mapsToGenerate = 10;
 
-    int m_numOfRooms = 20;
+    int m_numOfRooms = 14;
     int m_levelWidth = 80;
     int m_levelHight = 80;
 
