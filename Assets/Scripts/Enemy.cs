@@ -5,30 +5,49 @@ using UnityEngine;
 public enum EnemyState
 { 
     Idle,
+    Pushback,
     Wandering,
     Chasing,
     Attack,
-    Attacking
+    Attacking,
+    TurnAround
 }
 
 public class Enemy : MonoBehaviour
 {
     const float m_DETECT_RANGE = 3.0f;
     const float m_ATTACK_RANGE = 1.0f;
+    const float m_WANDER_OFFSET = 0.75f;
+    const float m_MOVE_FORCE_STRENGTH = 13.0f;
+    const float m_REPULSION_DECAY = 50.0f;
+    const float m_WANDER_RATE = 7.5f;
+
+    Room m_room = null;
 
     Rigidbody m_rb;
-    EnemyState m_state;
+
     Transform m_player;
 
-    Vector3 m_acceleration = new Vector3();
-    Vector3 m_targetPos;
+    EnemyState m_state;
+
+    [SerializeField]
+    Material m_defaultMat;
+
+    [SerializeField]
+    Material m_damagedMat;
+
+    Vector3 m_acceleration = Vector3.zero;
+    Vector3 m_targetPos = Vector3.zero;
 
     Vector3 m_roomCentre;
     Vector3 m_roomSize;
 
-    float m_accelForce = 13.0f;
+    float m_moveForce = 0.0f;
+    float m_detectionAngle = 30.0f;
 
     int m_health = 30;
+
+    bool m_canAttack = true;
 
     // Start is called before the first frame update
     void Awake()
@@ -38,99 +57,275 @@ public class Enemy : MonoBehaviour
         m_player = GameObject.FindGameObjectWithTag("Player").transform;
 
         m_state = EnemyState.Idle;
-
-        GenerateNewTarget();
     }
 
-    public void SetRoomDimensions(Vector3 t_roomCentre, Vector3 t_roomSize)
+    public void SetRoom(Room t_room)
     {
-        m_roomCentre = t_roomCentre;
-        m_roomSize = t_roomSize;
+        m_roomCentre = t_room.m_position;
+        m_roomSize = t_room.m_size;
+
+        m_room = t_room;
 
         m_state = EnemyState.Wandering;
-
-        GenerateNewTarget();
     }
 
     void FixedUpdate()
     {
-        m_rb.AddForce(m_acceleration * m_accelForce, ForceMode.Acceleration);
+        Move();
 
         switch (m_state)
         {
             case EnemyState.Wandering:
-                transform.LookAt(m_targetPos);
-                m_acceleration = transform.rotation * Vector3.forward;
-                m_acceleration.y = 0;
-                DetectPlayer();
+                UpdateWandering();
+                break;
+            case EnemyState.Pushback:
+                UpdatePushback();
                 break;
             case EnemyState.Chasing:
-                ChasePlayer();
+                UpdateChasing();
                 break;
             case EnemyState.Attack:
-                StartCoroutine(Attack());
+                UpdateAttack();
                 break;
             case EnemyState.Attacking:
+                UpdateAttacking();
+                break;
+            case EnemyState.TurnAround:
+                UpdateTurnAround();
                 break;
             default:
                 break;
         }
     }
 
+    void UpdateWandering()
+    {
+        Wander();
+        DetectPlayer();
+    }
+
+    void UpdateChasing()
+    {
+        ChasePlayer();
+    }
+
+    void UpdatePushback()
+    {
+        if (m_rb.velocity.magnitude == 0.0f)
+        {
+            m_state = EnemyState.Chasing;
+        }
+    }
+
+    void UpdateAttack()
+    {
+        if (m_canAttack)
+        {
+            StartCoroutine(Attack());
+        }
+    }
+
+    void UpdateAttacking()
+    {
+        if (m_canAttack)
+        {
+            if ((transform.position - m_player.position).magnitude < m_ATTACK_RANGE)
+            {
+                m_state = EnemyState.Attack;
+            }
+            else
+            {
+                m_state = EnemyState.Chasing;
+            }
+        }
+    }
+
+    void UpdateTurnAround()
+    {
+        Vector3 direction = (m_targetPos - transform.position).normalized;
+
+        if (FaceDirection(direction) <= 5.0f)
+        {
+            m_state = EnemyState.Wandering;
+        }
+    }
+
+    void CalculateAcceleration()
+    {
+        m_acceleration = (m_targetPos - transform.position).normalized * m_moveForce;
+
+        foreach (GameObject enemy in m_room.m_enemies)
+        {
+            if (enemy.GetComponent<Enemy>() != this)
+            {
+                AvoidTarget(enemy.transform.position);
+            }
+        }
+
+        m_acceleration.y = 0;
+
+        FaceDirection(m_acceleration);
+    }
+
+    void Move()
+    {
+        if (m_moveForce != 0)
+        {
+            CalculateAcceleration();
+
+            m_rb.AddForce(m_acceleration, ForceMode.Acceleration);
+
+            LimitVelocity();
+        }
+    }
+
+    void LimitVelocity()
+    {
+        Vector3 velocity = m_rb.velocity;
+
+        velocity.y = 0;
+
+        if (velocity.magnitude > 1.0f)
+        {
+            velocity = velocity.normalized * 1.0f;
+        }
+
+        velocity.y = m_rb.velocity.y;
+
+        m_rb.velocity = velocity;
+    }
+
+    void Wander()
+    {
+        Vector3 tempTarget = transform.position + (transform.rotation * Vector3.forward * m_WANDER_OFFSET);
+
+        float offsetOrentation = Random.Range(-m_WANDER_RATE, m_WANDER_RATE);
+
+        Vector3 tempDir = tempTarget - transform.position;
+
+        tempDir = Quaternion.Euler(0, offsetOrentation, 0) * tempDir;
+
+        m_targetPos = transform.position + tempDir;
+
+        if (CheckOutOfBounds())
+        {
+            m_state = EnemyState.TurnAround;
+            m_moveForce = 0;
+        }
+        else
+        {
+            m_moveForce = m_MOVE_FORCE_STRENGTH;
+        }
+    }
+
+    float FaceDirection(Vector3 t_targetDir)
+    {
+        Vector3 dirNormalized = t_targetDir.normalized;
+
+        Quaternion lookRotation = Quaternion.LookRotation(dirNormalized);
+
+        float angleBetween = Quaternion.Angle(transform.rotation, lookRotation);
+
+        float rotationStep = Mathf.Max(Mathf.Sqrt(angleBetween), 5.0f);
+
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, rotationStep);
+
+        return Quaternion.Angle(transform.rotation, lookRotation);
+    }
+
+    bool CheckIsTargetInVision(Vector3 t_targetPos)
+    {
+        Vector3 targetDir = t_targetPos - transform.position;
+
+        float angleToTarget = (Vector3.Angle(targetDir, m_acceleration));
+
+        if(targetDir.magnitude <= m_DETECT_RANGE)
+        {
+            if (angleToTarget <= m_detectionAngle && angleToTarget >= -m_detectionAngle)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void AvoidTarget(Vector3 t_targetPos)
+    {
+        if(CheckIsTargetInVision(t_targetPos))
+        {
+            Vector3 repulsionVect = transform.position - t_targetPos;
+
+            Debug.DrawRay(transform.position, repulsionVect.normalized, Color.green);
+
+            float strength = m_REPULSION_DECAY / (repulsionVect.magnitude * repulsionVect.magnitude);
+
+            repulsionVect = repulsionVect.normalized * strength;
+
+            m_acceleration += repulsionVect;
+        }
+    }
+
+    bool CheckOutOfBounds()
+    {
+        bool isOutOfBounds = false;
+
+        Vector3 dir = m_targetPos - transform.position;
+
+        if (Mathf.Abs((m_roomCentre - m_targetPos).x) > m_roomSize.x)
+        {
+            dir.x = -(dir.x);
+            isOutOfBounds = true;
+        }
+
+        if(Mathf.Abs((m_roomCentre - m_targetPos).z) > m_roomSize.z)
+        {
+            dir.z = -(dir.z);
+            isOutOfBounds = true;
+        }
+
+        m_targetPos = transform.position + dir;
+
+        return isOutOfBounds;
+    }
+
     IEnumerator Attack()
     {
+        m_canAttack = false;
+
         m_state = EnemyState.Attacking;
 
-        m_acceleration = Vector3.zero;
+        m_moveForce = 0.0f;
 
         m_player.gameObject.GetComponent<PlayerController>().TakeDamage(5);
 
         yield return new WaitForSeconds(1.0f);
 
-        if ((transform.position - m_player.position).magnitude < m_ATTACK_RANGE)
-        {
-            m_state = EnemyState.Attack;
-        }
-        else
-        {
-            m_state = EnemyState.Chasing;
-        }
+        m_canAttack = true;
     }
 
     void DetectPlayer()
     {
-        if((transform.position - m_player.position).magnitude < m_ATTACK_RANGE)
+        if(CheckIsTargetInVision(m_player.position))
         {
-            m_state = EnemyState.Attack;
-        }
+            if ((transform.position - m_player.position).magnitude < m_ATTACK_RANGE)
+            {
+                m_state = EnemyState.Attack;
+            }
 
-        else if((transform.position - m_player.position).magnitude < m_DETECT_RANGE)
-        {
-            m_state = EnemyState.Chasing;
-        }
-
-        else if((transform.position - m_targetPos).magnitude < 0.5f)
-        {
-            GenerateNewTarget();
+            else 
+            {
+                m_state = EnemyState.Chasing;
+            }
         }
     }
 
     void ChasePlayer()
     {
-        transform.LookAt(new Vector3(m_player.position.x, transform.position.y, m_player.position.z));
-
-        m_acceleration = transform.rotation * Vector3.forward;
-        m_acceleration.y = 0;
+        m_moveForce = m_MOVE_FORCE_STRENGTH;
+        m_targetPos = m_player.position;
 
         DetectPlayer();
-    }
-
-    void GenerateNewTarget()
-    {
-        m_targetPos = m_roomCentre;
-        m_targetPos.y = transform.position.y;
-        m_targetPos.x += Random.Range(-m_roomSize.x + 0.5f, m_roomSize.x - 0.5f);
-        m_targetPos.z += Random.Range(-m_roomSize.z + 0.5f, m_roomSize.z - 0.5f);
     }
 
     public void TakeDamage(int t_incomingDamage)
@@ -141,14 +336,31 @@ public class Enemy : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        else
+        {
+            StartCoroutine(ChangeColour());
+        }
+    }
+
+    IEnumerator ChangeColour()
+    {
+        gameObject.GetComponent<MeshRenderer>().material = m_damagedMat;
+
+        yield return new WaitForSeconds(0.5f);
+
+        gameObject.GetComponent<MeshRenderer>().material = m_defaultMat;
     }
 
     public void PushBack(Vector3 t_sourcePos)
     {
+        m_state = EnemyState.Pushback;
+
         Vector3 pushBackDir = (t_sourcePos - transform.position).normalized;
         pushBackDir.x = -(pushBackDir.x);
         pushBackDir.z = -(pushBackDir.z);
 
         m_rb.AddForce(pushBackDir * 10, ForceMode.Impulse);
+
+        m_moveForce = 0.0f;
     }
 }

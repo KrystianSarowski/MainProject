@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
         if(m_health < 0)
         {
             m_health = 0;
-            //GameplayManager.LoadScene("GameoverScene");
+            GameplayManager.LoadScene("GameoverScene");
         }
 
         m_playerUI.UpdateHealthBar(m_health);

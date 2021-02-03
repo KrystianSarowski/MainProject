@@ -18,7 +18,15 @@ public class Room : MonoBehaviour
     GameObject m_enemyPrefab;
 
     List<GameObject> m_doors = new List<GameObject>();
-    List<GameObject> m_enemies = new List<GameObject>();
+
+    [SerializeField]
+    public List<GameObject> m_enemies = new List<GameObject>();
+
+    [SerializeField]
+    public Vector3 m_size;
+
+    [SerializeField]
+    public Vector3 m_position;
 
     void Update()
     {
@@ -70,6 +78,8 @@ public class Room : MonoBehaviour
         }
 
         transform.position = position;
+
+        m_position = transform.position;
 
         PlaceDoors(t_tileSize, nodePos);
     }
@@ -126,7 +136,9 @@ public class Room : MonoBehaviour
         roomScale.z = roomScale.z / 2;
         roomScale.y = roomScale.y / 2;
 
-        for(int i = 0; i < 3; i++)
+        m_size = roomScale;
+
+        for (int i = 0; i < 3; i++)
         {
             Vector3 spawnPos = transform.position;
 
@@ -135,8 +147,8 @@ public class Room : MonoBehaviour
             spawnPos.y += -roomScale.y + (m_enemyPrefab.transform.localScale.y / 2);
 
             GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
-            enemy.GetComponent<Enemy>().SetRoomDimensions(transform.position, roomScale);
-            //enemy.transform.SetParent(transform);
+            enemy.GetComponent<Enemy>().SetRoom(this);
+            enemy.transform.SetParent(transform);
             m_enemies.Add(enemy);
         }
     }
