@@ -118,6 +118,18 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void ApplyPickup(string t_name)
+    {
+        switch (t_name)
+        {
+            case "Heart":
+                TakeDamage(-20);
+                break;
+            default:
+                break;
+        }
+    }
+
     IEnumerator attack()
     {
         m_isAttacking = true;
@@ -142,11 +154,21 @@ public class PlayerController : MonoBehaviour
         m_isAttacking = false;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Ground")
         {
             m_isFalling = false;
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Pickup")
+        {
+            ApplyPickup(other.GetComponent<Pickup>().GetName());
+
+            Destroy(other.gameObject);
         }
     }
 }

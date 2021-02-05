@@ -19,7 +19,7 @@ public class Enemy : MonoBehaviour
     const float m_ATTACK_RANGE = 1.0f;
     const float m_WANDER_OFFSET = 0.75f;
     const float m_MOVE_FORCE_STRENGTH = 13.0f;
-    const float m_REPULSION_DECAY = 50.0f;
+    const float m_REPULSION_DECAY = 5.0f;
     const float m_WANDER_RATE = 7.5f;
 
     Room m_room = null;
@@ -43,6 +43,7 @@ public class Enemy : MonoBehaviour
     Vector3 m_roomSize;
 
     float m_moveForce = 0.0f;
+    float m_wanderOrientation = 0.0f;
     float m_detectionAngle = 30.0f;
 
     int m_health = 30;
@@ -146,6 +147,11 @@ public class Enemy : MonoBehaviour
 
         if (FaceDirection(direction) <= 5.0f)
         {
+            Vector3 wanderDir = transform.rotation * Vector3.forward;
+            Vector3 orientationDir = Quaternion.AngleAxis(m_wanderOrientation, Vector3.up) * Vector3.forward;
+
+            m_wanderOrientation -= Vector3.Angle(orientationDir, wanderDir);
+
             m_state = EnemyState.Wandering;
         }
     }
@@ -156,9 +162,12 @@ public class Enemy : MonoBehaviour
 
         foreach (GameObject enemy in m_room.m_enemies)
         {
-            if (enemy.GetComponent<Enemy>() != this)
+            if(enemy != null)
             {
-                AvoidTarget(enemy.transform.position);
+                if (enemy.GetComponent<Enemy>() != this)
+                {
+                    AvoidTarget(enemy.transform.position);
+                }
             }
         }
 
@@ -199,11 +208,13 @@ public class Enemy : MonoBehaviour
     {
         Vector3 tempTarget = transform.position + (transform.rotation * Vector3.forward * m_WANDER_OFFSET);
 
-        float offsetOrentation = Random.Range(-m_WANDER_RATE, m_WANDER_RATE);
+        m_wanderOrientation += Random.Range(-m_WANDER_RATE, m_WANDER_RATE);
+
+        Quaternion radiusAngle = Quaternion.AngleAxis(m_wanderOrientation, Vector3.up);
 
         Vector3 tempDir = tempTarget - transform.position;
 
-        tempDir = Quaternion.Euler(0, offsetOrentation, 0) * tempDir;
+        tempDir += radiusAngle * Vector3.forward * 0.25f;
 
         m_targetPos = transform.position + tempDir;
 
@@ -224,11 +235,7 @@ public class Enemy : MonoBehaviour
 
         Quaternion lookRotation = Quaternion.LookRotation(dirNormalized);
 
-        float angleBetween = Quaternion.Angle(transform.rotation, lookRotation);
-
-        float rotationStep = Mathf.Max(Mathf.Sqrt(angleBetween), 5.0f);
-
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, rotationStep);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, 5.0f);
 
         return Quaternion.Angle(transform.rotation, lookRotation);
     }
