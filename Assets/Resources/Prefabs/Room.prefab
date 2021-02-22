@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6041474226846552186
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 956787311502724170}
+  - component: {fileID: 9045355818453425915}
+  - component: {fileID: 9050493502895740614}
+  m_Layer: 0
+  m_Name: Room
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &956787311502724170
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041474226846552186}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 16.281628, y: -5.449813, z: 39.273994}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &9045355818453425915
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041474226846552186}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &9050493502895740614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041474226846552186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb54da9b35bc1fc44ab2d2d62c180b16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_doorPrefab: {fileID: 8965023245911757771, guid: 7c2642fbe0f6bfe42888653cff9a549d,
+    type: 3}
+  m_enemyPrefab: {fileID: 6063363458670044145, guid: ae53586334677254b98a0f2ee8247679,
+    type: 3}
+  m_exitPrefab: {fileID: 6463290110360236839, guid: 3ccd5928e65e1884db3a3c3341b0ba1a,
+    type: 3}
+  m_enemies: []
+  m_size: {x: 0, y: 0, z: 0}
+  m_position: {x: 0, y: 0, z: 0}
+  m_roomType: 4
+  m_pickUpPrefabs:
+  - {fileID: 1588229349274512182, guid: 2bb4d16c11c34e7429595c2f7c724a44, type: 3}
+  - {fileID: 844585526067584695, guid: b1b1a71ba156eb144b9d42121dcc5378, type: 3}
