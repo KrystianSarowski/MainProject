@@ -15,6 +15,14 @@ public struct GenerationStats
     public int m_leastRoomsPlaced;
 }
 
+public struct GenerationData
+{
+    public int m_mapsToGenerate;
+    public int m_numOfRooms;
+    public int m_levelWidth;
+    public int m_levelHeight;
+}
+
 public class HeatSceneManager : MonoBehaviour
 {
     List<TileGrid> m_mapGrids;
@@ -22,11 +30,8 @@ public class HeatSceneManager : MonoBehaviour
 
     public GameObject m_heatTile;
 
-    public int m_mapsToGenerate = 10;
-
-    int m_numOfRooms = 14;
-    int m_levelWidth = 80;
-    int m_levelHight = 80;
+    GenerationData m_currentData;
+    GenerationData m_nextData;
 
     int[,] m_heatMapBottomUp;
     int[,] m_heatMapTopDown;
@@ -43,34 +48,94 @@ public class HeatSceneManager : MonoBehaviour
     GenerationStats m_bottomUpStats;
     GenerationStats m_topDownStats;
 
+    [SerializeField]
+    Slider m_mapSizeSlider;
+
+    [SerializeField]
+    Slider m_mapsToGenerateSlider;
+
+    [SerializeField]
+    Slider m_roomsToGenerateSlider;
+
+    [SerializeField]
+    GameObject m_heatTilesCanvas;
+
     public List<TMP_Text> m_bottomUpStatsText;
     public List<TMP_Text> m_topDownStatsText;
 
-    private void Start()
+    void Start()
     {
         m_canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
         m_camera = GameObject.FindGameObjectWithTag("MainCamera");
 
-        m_heatMapBottomUp = new int[m_levelWidth, m_levelHight];
-        m_tilesBottomUp = new GameObject[m_levelWidth, m_levelHight];
+        ChangeMapSize();
+        ChangeMapsToGenerate();
+        ChangeRoomsToGenerate();
+    }
 
-        m_heatMapTopDown = new int[m_levelWidth, m_levelHight];
-        m_tilesTopDown = new GameObject[m_levelWidth, m_levelHight];
+    void Update()
+    {
+        m_camera.transform.Translate(Vector3.up * Input.GetAxis("Mouse ScrollWheel") * 2000);
 
-        int secondGridOffset = 50 * m_levelWidth + 1000;
-
-        for (int x = 0; x < m_levelWidth; x++)
+        if (m_camera.transform.position.y > 1600.0f)
         {
-            for(int y = 0; y < m_levelHight; y++)
+            Vector3 pos = m_camera.transform.position;
+
+            pos.y = 1600.0f;
+
+            m_camera.transform.position = pos;
+        }
+
+        else if (m_camera.transform.position.y < -6000.0f)
+        {
+            Vector3 pos = m_camera.transform.position;
+
+            pos.y = -6000.0f;
+
+            m_camera.transform.position = pos;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GenerateMap();
+        }
+    }
+
+    void GenerateMap()
+    {
+        StopAllCoroutines();
+        ResetData();
+
+        foreach (Transform child in m_heatTilesCanvas.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        m_currentData = m_nextData;
+
+        m_heatMapBottomUp = new int[m_currentData.m_levelWidth, m_currentData.m_levelHeight];
+        m_tilesBottomUp = new GameObject[m_currentData.m_levelWidth, m_currentData.m_levelHeight];
+
+        m_heatMapTopDown = new int[m_currentData.m_levelWidth, m_currentData.m_levelHeight];
+        m_tilesTopDown = new GameObject[m_currentData.m_levelWidth, m_currentData.m_levelHeight];
+
+        int tilseSize = 4000 / m_currentData.m_levelWidth;
+        int secondGridOffset = tilseSize * m_currentData.m_levelWidth + 1000;
+
+        for (int x = 0; x < m_currentData.m_levelWidth; x++)
+        {
+            for (int y = 0; y < m_currentData.m_levelHeight; y++)
             {
                 m_tilesBottomUp[x, y] = Instantiate(m_heatTile, m_canvas.transform);
                 m_tilesBottomUp[x, y].transform.SetParent(m_canvas.transform);
-                m_tilesBottomUp[x, y].transform.position += new Vector3(50 * x, 50 * y, 0);
+                m_tilesBottomUp[x, y].GetComponent<RectTransform>().sizeDelta = new Vector2(tilseSize, tilseSize);
+                m_tilesBottomUp[x, y].transform.position += new Vector3(tilseSize * x, tilseSize * y, 0);
                 m_tilesBottomUp[x, y].GetComponent<Image>().color = m_startColour;
 
                 m_tilesTopDown[x, y] = Instantiate(m_heatTile, m_canvas.transform);
                 m_tilesTopDown[x, y].transform.SetParent(m_canvas.transform);
-                m_tilesTopDown[x, y].transform.position += new Vector3(secondGridOffset + 50 * x, 50 * y, 0);
+                m_tilesTopDown[x, y].GetComponent<RectTransform>().sizeDelta = new Vector2(tilseSize, tilseSize);
+                m_tilesTopDown[x, y].transform.position += new Vector3(secondGridOffset + tilseSize * x, tilseSize * y, 0);
                 m_tilesTopDown[x, y].GetComponent<Image>().color = m_startColour;
             }
         }
@@ -88,11 +153,30 @@ public class HeatSceneManager : MonoBehaviour
         StartCoroutine(GenerateHeatMapTopDown());
     }
 
+    public void ResetData()
+    {
+        m_bottomUpStats.m_avergeTime = 0.0f;
+        m_bottomUpStats.m_shortestTime = 0.0f;
+        m_bottomUpStats.m_longestTime = 0.0f;
+
+        m_bottomUpStats.m_avergeRoomsPlaced = 0;
+        m_bottomUpStats.m_mostRoomsPlaced = 0;
+        m_bottomUpStats.m_leastRoomsPlaced = 0;
+
+        m_topDownStats.m_avergeTime = 0.0f;
+        m_topDownStats.m_shortestTime = 0.0f;
+        m_topDownStats.m_longestTime = 0.0f;
+
+        m_topDownStats.m_avergeRoomsPlaced = 0;
+        m_topDownStats.m_mostRoomsPlaced = 0;
+        m_topDownStats.m_leastRoomsPlaced = 0;
+    }
+
     IEnumerator GenerateHeatMapBottomUp()
     {
-        for (int x = 0; x < m_levelWidth; x++)
+        for (int x = 0; x < m_currentData.m_levelWidth; x++)
         {
-            for(int y = 0; y < m_levelHight; y++)
+            for(int y = 0; y < m_currentData.m_levelHeight; y++)
             {
                 m_heatMapBottomUp[x, y] = 0;
             }
@@ -103,16 +187,16 @@ public class HeatSceneManager : MonoBehaviour
         m_bottomUpStats.m_leastRoomsPlaced = 1000;
         UpdateStatsText(m_bottomUpStatsText, m_bottomUpStats);
 
-        while (mapsGenerated != m_mapsToGenerate)
+        while (mapsGenerated != m_currentData.m_mapsToGenerate)
         {
             float startTime = Time.time;
 
-            m_mapGrids[0] = new TileGrid(m_levelWidth, m_levelHight);
+            m_mapGrids[0] = new TileGrid(m_currentData.m_levelWidth, m_currentData.m_levelHeight);
             m_mapGrids[0].CreateTileGrid();
 
             m_roomLists[0] = new List<RoomLayout>();
 
-            for (int i = 0; i < m_numOfRooms; i++)
+            for (int i = 0; i < m_currentData.m_numOfRooms; i++)
             {
                 m_roomLists[0].Add(new RoomLayout());
                 m_roomLists[0][i].SetID(i);
@@ -135,9 +219,9 @@ public class HeatSceneManager : MonoBehaviour
 
     IEnumerator GenerateHeatMapTopDown()
     {
-        for (int x = 0; x < m_levelWidth; x++)
+        for (int x = 0; x < m_currentData.m_levelWidth; x++)
         {
-            for (int y = 0; y < m_levelHight; y++)
+            for (int y = 0; y < m_currentData.m_levelHeight; y++)
             {
                 m_heatMapBottomUp[x, y] = 0;
             }
@@ -148,15 +232,15 @@ public class HeatSceneManager : MonoBehaviour
         m_topDownStats.m_leastRoomsPlaced = 1000;
         UpdateStatsText(m_topDownStatsText, m_topDownStats);
 
-        while (mapsGenerated != m_mapsToGenerate)
+        while (mapsGenerated != m_currentData.m_mapsToGenerate)
         {
             float startTime = Time.time;
 
-            m_mapGrids[1] = new TileGrid(m_levelWidth, m_levelHight);
+            m_mapGrids[1] = new TileGrid(m_currentData.m_levelWidth, m_currentData.m_levelHeight);
             m_mapGrids[1].CreateTileGrid();
             m_roomLists[1] = new List<RoomLayout>();
 
-            for (int i = 0; i < m_numOfRooms; i++)
+            for (int i = 0; i < m_currentData.m_numOfRooms; i++)
             {
                 m_roomLists[1].Add(new RoomLayout());
                 m_roomLists[1][i].SetID(i);
@@ -227,18 +311,18 @@ public class HeatSceneManager : MonoBehaviour
         t_statsText[1].text = "Shortest Time: " + t_stats.m_shortestTime.ToString("F3") + "s";
         t_statsText[2].text = "Longest Time: " + t_stats.m_longestTime.ToString("F3") + "s";
 
-        t_statsText[3].text = "Average Rooms Placed: " + t_stats.m_avergeRoomsPlaced + "/" + m_numOfRooms;
-        t_statsText[4].text = "Least Rooms Placed: " + t_stats.m_leastRoomsPlaced + "/" + m_numOfRooms;
-        t_statsText[5].text = "Most Rooms Placed: " + t_stats.m_mostRoomsPlaced + "/" + m_numOfRooms;
+        t_statsText[3].text = "Average Rooms Placed: " + t_stats.m_avergeRoomsPlaced + "/" + m_currentData.m_numOfRooms;
+        t_statsText[4].text = "Least Rooms Placed: " + t_stats.m_leastRoomsPlaced + "/" + m_currentData.m_numOfRooms;
+        t_statsText[5].text = "Most Rooms Placed: " + t_stats.m_mostRoomsPlaced + "/" + m_currentData.m_numOfRooms;
     }
 
     float UpdateHeatMap(float t_mapsGenerated, TileGrid t_grid, int[,] t_heatMap, GameObject[,] t_tileMap)
     {
         t_mapsGenerated++;
 
-        for (int x = 0; x < m_levelWidth; x++)
+        for (int x = 0; x < m_currentData.m_levelWidth; x++)
         {
-            for (int y = 0; y < m_levelHight; y++)
+            for (int y = 0; y < m_currentData.m_levelHeight; y++)
             {
                 if (t_grid.GetTile(new GridIndex(x, y)).GetOwnerID() != -1)
                 {
@@ -287,31 +371,24 @@ public class HeatSceneManager : MonoBehaviour
         yield return null;
     }
 
-    private void Update()
-    {
-        m_camera.transform.Translate(Vector3.up * Input.GetAxis("Mouse ScrollWheel") * 1000);
-
-        if (m_camera.transform.position.y > -1900.0f)
-        {
-            Vector3 pos = m_camera.transform.position;
-
-            pos.y = -1900.0f;
-
-            m_camera.transform.position = pos;
-        }
-
-        else if (m_camera.transform.position.y < -6000.0f)
-        {
-            Vector3 pos = m_camera.transform.position;
-
-            pos.y = -6000.0f;
-
-            m_camera.transform.position = pos;
-        }
-    }
-
     public void Return()
     {
         GameplayManager.LoadScene("MenuScene");
+    }
+
+    public void ChangeMapSize()
+    {
+        m_nextData.m_levelWidth = (int)m_mapSizeSlider.value;
+        m_nextData.m_levelHeight = (int)m_mapSizeSlider.value;
+    }
+
+    public void ChangeMapsToGenerate()
+    {
+        m_nextData.m_mapsToGenerate = (int)m_mapsToGenerateSlider.value;
+    }
+
+    public void ChangeRoomsToGenerate()
+    {
+        m_nextData.m_numOfRooms = (int)m_roomsToGenerateSlider.value;
     }
 }

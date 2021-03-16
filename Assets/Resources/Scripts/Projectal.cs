@@ -102,15 +102,18 @@ public class Projectal : MonoBehaviour
 
     void OnCollisionEnter(Collision t_collision)
     {
-        if(m_isAreaEffect)
+        if(t_collision.transform.tag != transform.tag)
         {
-            CreateExplosion();
-        }
-        else
-        {
-            DealDamage(t_collision.gameObject);
-        }
+            if (m_isAreaEffect)
+            {
+                CreateExplosion();
+            }
+            else
+            {
+                DealDamage(t_collision.gameObject);
+            }
 
-        Destroy(gameObject);
+            Destroy(gameObject);
+        }
     }
 }

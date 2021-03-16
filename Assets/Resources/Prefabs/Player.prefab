@@ -80,7 +80,7 @@ MonoBehaviour:
   m_speed: 50
   m_maxSpeed: 4.59
   m_jumpVelocity: 5
-  m_weaponName: Sword
+  m_weaponName: Pistol
 --- !u!114 &222663371052367685
 MonoBehaviour:
   m_ObjectHideFlags: 0

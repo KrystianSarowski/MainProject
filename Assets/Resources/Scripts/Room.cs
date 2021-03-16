@@ -26,6 +26,9 @@ public class Room : MonoBehaviour
     GameObject m_enemyPrefab;
 
     [SerializeField]
+    GameObject m_bossPrefab;
+
+    [SerializeField]
     GameObject m_exitPrefab;
 
     List<GameObject> m_doors = new List<GameObject>();
@@ -67,6 +70,17 @@ public class Room : MonoBehaviour
     public void SetLayout(RoomLayout t_layout)
     {
         m_layout = t_layout;
+    }
+
+    public void SetRoomSize()
+    {
+        Vector3 roomScale = GetComponent<BoxCollider>().size;
+
+        roomScale.x = roomScale.x / 2;
+        roomScale.z = roomScale.z / 2;
+        roomScale.y = roomScale.y / 2;
+
+        m_size = roomScale;
     }
 
     public void SetRoomType(RoomType t_roomType)
@@ -168,7 +182,14 @@ public class Room : MonoBehaviour
 
     void LockRoom()
     {
-        SpawnEnemies();
+        if(m_roomType == RoomType.Boss)
+        {
+            SpawnBoss();
+        }
+        else
+        {
+            SpawnEnemies();
+        }
 
         foreach(GameObject door in m_doors)
         {
@@ -189,29 +210,31 @@ public class Room : MonoBehaviour
 
     void SpawnEnemies()
     {
-        Vector3 roomScale = GetComponent<BoxCollider>().size;
+        int numOfEnemies = (int)(m_size.x * m_size.z / 7.5f);
 
-        int numOfEnemies = (int)(roomScale.x * roomScale.z / 15);
-
-        roomScale.x = roomScale.x / 2;
-        roomScale.z = roomScale.z / 2;
-        roomScale.y = roomScale.y / 2;
-
-        m_size = roomScale;
-        
         for (int i = 0; i < numOfEnemies; i++)
         {
             Vector3 spawnPos = transform.position;
 
-            spawnPos.x += Random.Range(-roomScale.x, roomScale.x);
-            spawnPos.z += Random.Range(-roomScale.z, roomScale.z);
-            spawnPos.y += -roomScale.y + (m_enemyPrefab.transform.localScale.y / 2);
+            spawnPos.x += Random.Range(-m_size.x, m_size.x);
+            spawnPos.z += Random.Range(-m_size.z, m_size.z);
+            spawnPos.y += -m_size.y + (m_enemyPrefab.transform.localScale.y / 2);
 
             GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
             enemy.GetComponent<Enemy>().SetRoom(this);
             enemy.transform.SetParent(transform);
             m_enemies.Add(enemy);
         }
+    }
+
+    void SpawnBoss()
+    {
+        Vector3 spawnPos = transform.position;
+
+        GameObject boss = Instantiate(m_bossPrefab, spawnPos, m_bossPrefab.transform.rotation);
+        boss.GetComponent<Boss>().Initialize(this, GameObject.FindGameObjectWithTag("Player").transform);
+        boss.transform.SetParent(transform);
+        m_enemies.Add(boss);
     }
 
     private void OnTriggerEnter(Collider other)

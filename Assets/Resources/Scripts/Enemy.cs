@@ -39,6 +39,9 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     Material m_damagedMat;
 
+    [SerializeField]
+    ParticleSystem m_bloodSystem;
+
     Vector3 m_acceleration = Vector3.zero;
     Vector3 m_accelDir = Vector3.zero;
     Vector3 m_targetPos = Vector3.zero;
@@ -380,6 +383,7 @@ public class Enemy : MonoBehaviour
         else
         {
             StartCoroutine(ChangeColour());
+            m_bloodSystem.StartSystem();
         }
     }
 

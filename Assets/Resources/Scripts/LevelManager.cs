@@ -294,6 +294,7 @@ public class LevelManager : MonoBehaviour
                 room.GetComponent<Room>().SetLayout(layout);
                 room.GetComponent<Room>().ImplementLayout(m_tileSize);
                 room.GetComponent<Room>().SetRandomRoomType();
+                room.GetComponent<Room>().SetRoomSize();
 
                 m_rooms.Add(room.GetComponent<Room>());
             }

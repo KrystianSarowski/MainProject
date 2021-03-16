@@ -13,6 +13,9 @@ public class Gun : Weapon
     [SerializeField]
     float m_reloadDelay;
 
+    [SerializeField]
+    int m_pelletCount;
+
     int m_ammoCount;
 
     [SerializeField]
@@ -25,6 +28,8 @@ public class Gun : Weapon
 
     PlayerUI m_playerUI = null;
 
+    ParticleSystem m_particleSystem;
+
     public override void Initialize()
     {
         m_ammoCount = m_maxAmmo;
@@ -35,6 +40,8 @@ public class Gun : Weapon
             m_playerUI.EnableAmmoText();
             m_playerUI.UpdateAmmoText(m_ammoCount, m_maxAmmo);
         }
+
+        m_particleSystem = GetComponentInChildren<ParticleSystem>();
     }
 
     IEnumerator GunCoolDown()
@@ -78,19 +85,42 @@ public class Gun : Weapon
         {
             m_isAttacking = true;
 
-            Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5F, 0.5F, 0));
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
+            if(m_pelletCount == 1)
             {
-                Vector3 bulletDir = hit.point - m_bulletSpawn.position;
+                Vector3 bulletDir = transform.TransformDirection(Vector3.left);
 
                 GameObject bullet = Instantiate(m_bulletPrefab, m_bulletSpawn.position, m_bulletPrefab.transform.rotation);
 
                 bullet.GetComponent<Projectal>().Fire(bulletDir, m_stats.m_damageMultiplier);
-
-                StartCoroutine(GunCoolDown());
             }
+            else
+            {
+                FirePellets();
+            }
+
+            StartCoroutine(GunCoolDown());
+
+            if (m_particleSystem != null)
+            {
+                m_particleSystem.StartSystem();
+            }
+        }
+    }
+
+    void FirePellets()
+    {
+        for(int i = 0; i < m_pelletCount; i++)
+        {
+            Vector3 bulletDir = Vector3.left;
+
+            bulletDir.y = Random.Range(-0.3f, 0.3f);
+            bulletDir.z = Random.Range(-0.3f, 0.3f);
+
+            bulletDir = transform.TransformDirection(bulletDir);
+
+            GameObject bullet = Instantiate(m_bulletPrefab, m_bulletSpawn.position, m_bulletPrefab.transform.rotation);
+
+            bullet.GetComponent<Projectal>().Fire(bulletDir, m_stats.m_damageMultiplier);
         }
     }
 }

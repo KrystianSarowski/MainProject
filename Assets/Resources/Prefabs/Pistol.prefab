@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8294878794614913191}
+  - component: {fileID: 2905244217381079272}
   m_Layer: 0
   m_Name: Bullet Spawn
   m_TagString: Untagged
@@ -30,6 +31,48 @@ Transform:
   m_Father: {fileID: 8401444410260011428}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2905244217381079272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8294878794614913188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603416ed175791e449dd90a19a75700c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_pariclePrefab: {fileID: 2343356841660997606, guid: 818d2c5532727b2448b841b96cf38c10,
+    type: 3}
+  m_initialSpeed: 3
+  m_maxParticleCount: 100
+  m_isContinues: 0
+  m_isRelative: 1
+  m_particleDelay: 0.001
+  m_isActive: 0
+  m_particleData:
+    m_timeToLive: 0.05
+    m_rotationSpeed: 0
+    m_changeSizeOverTime: 1
+    m_startSize: 0.005
+    m_finalSize: 0.0001
+    m_changeColourOverTime: 1
+    m_startColour: {r: 0.99304765, g: 1, b: 0.6367924, a: 1}
+    m_endColour: {r: 1, g: 1, b: 1, a: 1}
+    m_useGravity: 0
+  m_emissionShape: 0
+  m_coneEmission:
+    m_maxRadius: 0.1
+    m_minRadius: 0
+    m_angle: 30
+    m_direction: {x: -1, y: 0, z: 0}
+  m_cubeEmission:
+    m_rotation: {x: 0, y: 0, z: 0}
+    m_scale: {x: 0.01, y: 0.1, z: 0.1}
+  m_sphereEmission:
+    m_maxRadius: 0
+    m_minRadius: 0
 --- !u!1 &9213306562809783070
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,5 +178,6 @@ MonoBehaviour:
     type: 3}
   m_bulletSpawn: {fileID: 8294878794614913191}
   m_reloadDelay: 1
+  m_pelletCount: 1
   m_maxAmmo: 10
   m_isPlayerWeapon: 1

@@ -107,6 +107,7 @@ GameObject:
   - component: {fileID: 7136147473397489508}
   - component: {fileID: 6499155947792936600}
   - component: {fileID: 3367581961292608767}
+  - component: {fileID: 7984112425522202984}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -205,6 +206,7 @@ MonoBehaviour:
     type: 3}
   m_defaultMat: {fileID: 2100000, guid: 04e61373e210a374fb2b5dc595d4dd67, type: 2}
   m_damagedMat: {fileID: 2100000, guid: caf89fccfaf1e3942a6ded8f7def725c, type: 2}
+  m_bloodSystem: {fileID: 7984112425522202984}
 --- !u!54 &3367581961292608767
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -221,3 +223,44 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &7984112425522202984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6063363458670044145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603416ed175791e449dd90a19a75700c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_pariclePrefab: {fileID: 2343356841660997606, guid: 818d2c5532727b2448b841b96cf38c10,
+    type: 3}
+  m_initialSpeed: 3
+  m_maxParticleCount: 50
+  m_isContinues: 0
+  m_particleDelay: 0
+  m_isActive: 0
+  m_particleData:
+    m_timeToLive: 2
+    m_rotationSpeed: 0
+    m_changeSizeOverTime: 1
+    m_startSize: 0.1
+    m_finalSize: 0.01
+    m_changeColourOverTime: 1
+    m_startColour: {r: 1, g: 0, b: 0, a: 1}
+    m_endColour: {r: 0.38679248, g: 0, b: 0, a: 1}
+    m_useGravity: 1
+  m_emissionShape: 1
+  m_coneEmission:
+    m_maxRadius: 0
+    m_minRadius: 0
+    m_angle: 0
+    m_direction: {x: 0, y: 0, z: 0}
+  m_cubeEmission:
+    m_rotation: {x: 0, y: 0, z: 0}
+    m_scale: {x: 0.5, y: 0.5, z: 0.5}
+  m_sphereEmission:
+    m_maxRadius: 0.5
+    m_minRadius: 0
