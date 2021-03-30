@@ -24,7 +24,20 @@ public class Weapon : MonoBehaviour
 
     public virtual void Initialize()
     {
-        //Initialize needed data;
+        if(FindObjectOfType<GameplayManager>().GetCurrentLevel() != 1)
+        {
+            m_stats = DataLoad.LoadWeaponData("Weapon");
+        }
+    }
+
+    public void SetWeaponStats(WeaponStats t_weaponStats)
+    {
+        m_stats = t_weaponStats;
+    }
+
+    public WeaponStats GetWeaponStats()
+    {
+        return m_stats;
     }
 
     public virtual void Attack()
@@ -48,5 +61,10 @@ public class Weapon : MonoBehaviour
     public void IncreaseDamageMultiplier()
     {
         m_stats.m_damageMultiplier += m_stats.m_damageMultiplierIncrease;
+    }
+
+    public void SaveWeaponStats()
+    {
+        DataSave.SaveWeaponData(m_stats, "Weapon");
     }
 }

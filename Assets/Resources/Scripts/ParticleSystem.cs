@@ -59,6 +59,12 @@ public class ParticleSystem : MonoBehaviour
     [SerializeField]
     bool m_isActive;
 
+    [HideInInspector]
+    public bool m_destoryAfterDelay;
+
+    [HideInInspector]
+    public float m_timeToLive;
+
     [SerializeField]
     ParticleData m_particleData;
 
@@ -76,11 +82,18 @@ public class ParticleSystem : MonoBehaviour
 
     float m_currentTime = 0.0f;
 
+    int m_currentParticleCount = 0;
+
     void Awake()
     {
         if(m_isActive)
         {
             StartSystem();
+        }
+
+        if(m_destoryAfterDelay)
+        {
+            Destroy(gameObject, m_timeToLive);
         }
     }
 
@@ -101,11 +114,8 @@ public class ParticleSystem : MonoBehaviour
     {
         GameObject particle = Instantiate(m_pariclePrefab, t_position, m_pariclePrefab.transform.rotation);
 
-        particle.transform.SetParent(transform);
-
         particle.GetComponent<Rigidbody>().AddForce(t_direction * m_initialSpeed, ForceMode.Impulse);
-
-        particle.GetComponent<Particle>().SetData(m_particleData);
+        particle.GetComponent<Particle>().SetData(m_particleData, this);
     }
 
     void ConeEmission(int t_numOfParticles)
@@ -118,7 +128,7 @@ public class ParticleSystem : MonoBehaviour
             emissionDir = transform.TransformDirection(m_coneEmission.m_direction);
         }
 
-        if (m_coneEmission.m_direction.normalized != Vector3.forward)
+        if (m_coneEmission.m_direction.normalized != Vector3.forward && m_coneEmission.m_direction.normalized != Vector3.back)
         {
             innerAxis = Vector3.Cross(emissionDir, Vector3.forward).normalized;
         }
@@ -203,7 +213,16 @@ public class ParticleSystem : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    public void AddParticle()
+    {
+        m_currentParticleCount++;
+    }
+
+    public void RemoveParticle()
+    {
+        m_currentParticleCount--;
+    }
+
     void Update()
     {
         if(m_isActive && m_isContinues)
@@ -212,7 +231,7 @@ public class ParticleSystem : MonoBehaviour
 
             if(m_currentTime >= m_particleDelay)
             {
-                if(transform.childCount < m_maxParticleCount)
+                if(m_currentParticleCount < m_maxParticleCount)
                 {
                     EmitParticles(1);
                     m_currentTime = 0.0f;
@@ -236,6 +255,13 @@ public class RandomScript_Editor : Editor
         if(particleSystem.m_isContinues)
         {
             particleSystem.m_particleDelay = EditorGUILayout.FloatField("Particle Delay", particleSystem.m_particleDelay);
+        }
+
+        particleSystem.m_destoryAfterDelay = EditorGUILayout.Toggle("Destroy After Delay", particleSystem.m_destoryAfterDelay);
+
+        if (particleSystem.m_destoryAfterDelay)
+        {
+            particleSystem.m_timeToLive = EditorGUILayout.FloatField("Time To Live", particleSystem.m_timeToLive);
         }
     }
 }

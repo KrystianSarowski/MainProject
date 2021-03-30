@@ -13,6 +13,7 @@ public class PlayerUI : MonoBehaviour
     RectTransform m_healthBar;
 
     TMP_Text m_ammoText;
+    TMP_Text m_goldText;
 
     Vector2 m_healthBarMaxSize;
 
@@ -37,12 +38,21 @@ public class PlayerUI : MonoBehaviour
             {
                 m_ammoText = child.GetComponent<TMP_Text>();
             }
+            else if(child.name == "Gold Text")
+            {
+                m_goldText = child.GetComponent<TMP_Text>();
+            }
         }
     }
 
-    public void EnableAmmoText()
+    void Update()
     {
-        m_ammoText.gameObject.SetActive(true);
+        m_goldText.text = PlayerStats.s_gold.ToString();     
+    }
+
+    public void EnableAmmoText(bool t_setActive)
+    {
+        m_ammoText.gameObject.SetActive(t_setActive);
     }
 
     public void UpdateHealthBar(int t_health)

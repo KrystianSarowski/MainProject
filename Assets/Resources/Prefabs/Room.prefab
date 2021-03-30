@@ -63,6 +63,8 @@ MonoBehaviour:
     type: 3}
   m_bossPrefab: {fileID: 8207134400026370873, guid: d4b55e816788e7f4fba2d15940098114,
     type: 3}
+  m_shopkeeperPrefab: {fileID: 7580780097185887918, guid: 1a335f355bb674345a3567a26b07f9b5,
+    type: 3}
   m_exitPrefab: {fileID: 6463290110360236839, guid: 3ccd5928e65e1884db3a3c3341b0ba1a,
     type: 3}
   m_enemies: []

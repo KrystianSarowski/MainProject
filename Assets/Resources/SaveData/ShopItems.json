@@ -1,0 +1,44 @@
+{
+    "m_shopItems": [
+        {
+            "m_shopSpriteName": "Heal",
+            "m_itemName": "Heal",
+            "m_itemType": 0,
+            "m_isAvailable": true,
+            "m_isAvailable": false,
+            "m_cost": 100
+        },
+        {
+            "m_shopSpriteName": "AttackSpeed",
+            "m_itemName": "Attack Speed",
+            "m_itemType": 1,
+            "m_isAvailable": true,
+            "m_isAvailable": false,
+            "m_cost": 350
+        },
+        {
+            "m_shopSpriteName": "DamageUp",
+            "m_itemName": "Damage Up",
+            "m_itemType": 1,
+            "m_isAvailable": true,
+            "m_isAvailable": false,
+            "m_cost": 325
+        },
+        {
+            "m_shopSpriteName": "Pistol",
+            "m_itemName": "Pistol",
+            "m_itemType": 2,
+            "m_isAvailable": true,
+            "m_isAvailable": false,
+            "m_cost": 90
+        },
+        {
+            "m_shopSpriteName": "Sword",
+            "m_itemName": "Sword",
+            "m_itemType": 2,
+            "m_isAvailable": true,
+            "m_isAvailable": false,
+            "m_cost": 10
+        }
+    ]
+}

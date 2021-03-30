@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 2343356841660997601}
   - component: {fileID: 2343356841660997600}
   - component: {fileID: 2343356841660997607}
-  m_Layer: 0
+  - component: {fileID: 9059476666649705072}
+  m_Layer: 8
   m_Name: Particle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,3 +110,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 195a4e2176d8f6a40bcf9515d3d8e594, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &9059476666649705072
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2343356841660997606}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

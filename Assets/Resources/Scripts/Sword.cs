@@ -27,9 +27,13 @@ public class Sword : Weapon
 
     public override void Initialize()
     {
+        base.Initialize();
+
         m_defaultRotation = transform.localRotation;
         transform.Rotate(Vector3.down, 60.0f);
         m_targetRotation = transform.localRotation;
+
+        FindObjectOfType<PlayerUI>().EnableAmmoText(false);
 
         transform.localRotation = m_defaultRotation;
     }

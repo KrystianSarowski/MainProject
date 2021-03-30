@@ -23,6 +23,8 @@ public class GameplayManager : MonoBehaviour
 
     public string m_seed;
 
+    public static bool s_isPaused = false;
+
     [HideInInspector]
     public const int m_MAX_SEED_SIZE = 6;
 
@@ -93,8 +95,25 @@ public class GameplayManager : MonoBehaviour
         }
     }
 
+    public static void Pause()
+    {
+        Time.timeScale = 0;
+        s_isPaused = true;
+    }
+
+    public static void UnPause()
+    {
+        Time.timeScale = 1;
+        s_isPaused = false;
+    }
+
     public static void LoadScene(string t_string)
     {
         SceneManager.LoadScene(t_string);
+    }
+
+    public int GetCurrentLevel()
+    {
+        return m_currentLevel;
     }
 }

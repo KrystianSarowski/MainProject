@@ -27,7 +27,12 @@ public class CameraController : MonoBehaviour
     //Update is called once per frame
     void LateUpdate()
     {
-        if(m_player != null)
+        if (GameplayManager.s_isPaused)
+        {
+            return;
+        }
+
+        if (m_player != null)
         {
             Vector2 newChangeVector = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
 

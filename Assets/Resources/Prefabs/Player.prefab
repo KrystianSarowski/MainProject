@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 222663371052367682}
   - component: {fileID: 222663371052367686}
   - component: {fileID: 222663371052367685}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -77,9 +77,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0b366763eb8e29429a665551cd435af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_speed: 50
-  m_maxSpeed: 4.59
-  m_jumpVelocity: 5
+  m_speed: 30
+  m_maxSpeed: 3.5
+  m_jumpVelocity: 4
   m_weaponName: Pistol
 --- !u!114 &222663371052367685
 MonoBehaviour:
@@ -106,7 +106,7 @@ GameObject:
   - component: {fileID: 7489759607796691071}
   - component: {fileID: 7489759607796691070}
   - component: {fileID: 7489759607796691069}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Body
   m_TagString: Player
   m_Icon: {fileID: 0}

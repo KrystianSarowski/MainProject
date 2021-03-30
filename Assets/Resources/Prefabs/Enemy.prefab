@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 515753747014498010}
   - component: {fileID: 7951869766961787436}
   - component: {fileID: 5952476325472000961}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 6499155947792936600}
   - component: {fileID: 3367581961292608767}
   - component: {fileID: 7984112425522202984}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -204,6 +204,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_healPrefab: {fileID: 5065717261741198004, guid: 70ab759c64705ef439320986067f8174,
     type: 3}
+  m_goldExplosionPrefab: {fileID: 4535639095347768206, guid: b2fd34d61f0711a40844703b73db6a86,
+    type: 3}
   m_defaultMat: {fileID: 2100000, guid: 04e61373e210a374fb2b5dc595d4dd67, type: 2}
   m_damagedMat: {fileID: 2100000, guid: caf89fccfaf1e3942a6ded8f7def725c, type: 2}
   m_bloodSystem: {fileID: 7984112425522202984}
@@ -240,10 +242,13 @@ MonoBehaviour:
   m_initialSpeed: 3
   m_maxParticleCount: 50
   m_isContinues: 0
+  m_isRelative: 0
   m_particleDelay: 0
   m_isActive: 0
+  m_destoryAfterDelay: 0
+  m_timeToLive: 0
   m_particleData:
-    m_timeToLive: 2
+    m_timeToLive: 1
     m_rotationSpeed: 0
     m_changeSizeOverTime: 1
     m_startSize: 0.1
@@ -252,6 +257,7 @@ MonoBehaviour:
     m_startColour: {r: 1, g: 0, b: 0, a: 1}
     m_endColour: {r: 0.38679248, g: 0, b: 0, a: 1}
     m_useGravity: 1
+    m_moveWithParent: 0
   m_emissionShape: 1
   m_coneEmission:
     m_maxRadius: 0

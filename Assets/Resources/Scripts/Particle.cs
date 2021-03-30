@@ -19,6 +19,7 @@ public struct ParticleData
     public Color m_endColour;
 
     public bool m_useGravity;
+    public bool m_moveWithParent;
 }
 
 public class Particle : MonoBehaviour
@@ -33,24 +34,39 @@ public class Particle : MonoBehaviour
 
     Rigidbody m_rigidbody;
 
-    public void SetData(ParticleData t_particleData)
+    ParticleSystem m_parentSystem;
+
+    public void SetData(ParticleData t_particleData, ParticleSystem t_parentSystem)
     {
+        m_parentSystem = t_parentSystem;
         m_data = t_particleData;
         m_timeAlive = 0.0f;
 
         Destroy(gameObject, m_data.m_timeToLive);
 
         m_startScale = transform.localScale;
-
         transform.localScale = m_startScale * m_data.m_startSize;
 
         m_meshRenderer = GetComponent<MeshRenderer>();
-
         m_meshRenderer.material.color = m_data.m_startColour;
 
         m_rigidbody = GetComponent<Rigidbody>();
-
         m_rigidbody.useGravity = m_data.m_useGravity;
+
+        if(m_data.m_moveWithParent)
+        {
+            transform.SetParent(m_parentSystem.gameObject.transform);
+        }
+
+        m_parentSystem.AddParticle();
+    }
+
+    void OnDestroy()
+    {
+        if (m_parentSystem != null)
+        {
+            m_parentSystem.RemoveParticle();
+        }
     }
 
     void Update()

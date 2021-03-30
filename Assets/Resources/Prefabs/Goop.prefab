@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7226991263533267442}
   - component: {fileID: 1918414285994724348}
   - component: {fileID: 4066778991049885031}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Goop
   m_TagString: Untagged
   m_Icon: {fileID: 0}

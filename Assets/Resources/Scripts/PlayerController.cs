@@ -5,25 +5,30 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Range(0.1f, 100.0f)]
-    public float m_speed = 50.0f;       //The speed at which the player moves in a certain direction.
+    [SerializeField]
+    float m_speed = 50.0f;       //The speed at which the player moves in a certain direction.
 
     [Range(0.1f, 10.0f)]
-    public float m_maxSpeed = 5.0f;     //The max speed at which the player can travel.
+    [SerializeField]
+    float m_maxSpeed = 5.0f;     //The max speed at which the player can travel.
 
     [Range(0.1f, 5.0f)]
-    public float m_jumpVelocity = 3.5f;
-
-    //The rigid body of the player.
-    Rigidbody m_rb;
+    [SerializeField]
+    float m_jumpVelocity = 3.5f;
 
     [SerializeField]
     string m_weaponName;
 
+    float m_interactRange = 1.0f;
+
+    bool m_isFalling;
+
+    //The rigid body of the player.
+    Rigidbody m_rb;
+
     Weapon m_weapon;
 
     PlayerUI m_playerUI;
-
-    bool m_isFalling;
 
     //Start is called before the first frame update
     void Start()
@@ -49,6 +54,11 @@ public class PlayerController : MonoBehaviour
 
     void InitializeWeapon(GameObject t_camera)
     {
+        if(m_weapon != null)
+        {
+            Destroy(m_weapon.gameObject);
+        }
+
         GameObject weaponPrefab = Resources.Load<GameObject>("Prefabs/" + m_weaponName);
 
         GameObject weaponObject = Instantiate(weaponPrefab, transform.position + weaponPrefab.GetComponent<Weapon>().m_spawnOffset, weaponPrefab.transform.rotation);
@@ -57,13 +67,20 @@ public class PlayerController : MonoBehaviour
 
         m_weapon = weaponObject.GetComponent<Weapon>();
         m_weapon.Initialize();
+        m_weapon.SaveWeaponStats();
     }
 
     //Update is called once per frame
     void Update()
     {
+        if(GameplayManager.s_isPaused)
+        {
+            return;
+        }
+
         Move();
         Jump();
+        Interact();
 
         if(Input.GetMouseButton(0))
         {
@@ -76,6 +93,30 @@ public class PlayerController : MonoBehaviour
         }
 
         m_playerUI.UpdateHealthBar(PlayerStats.s_health);
+    }
+
+    void Interact()
+    { 
+        if(Input.GetKeyDown(KeyCode.E))
+        {
+            Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5F, 0.5F, 0));
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.distance <= m_interactRange)
+                {
+                    switch (hit.collider.tag)
+                    {
+                        case "Shopkeeper":
+                            hit.collider.GetComponent<Shopkeeper>().Interact();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     void Move()
@@ -130,9 +171,11 @@ public class PlayerController : MonoBehaviour
                 break;
             case "DamageUp":
                 m_weapon.IncreaseDamageMultiplier();
+                m_weapon.SaveWeaponStats();
                 break;
             case "AttackSpeed":
                 m_weapon.DecreaseAttackDelay();
+                m_weapon.SaveWeaponStats();
                 break;
             default:
                 break;
@@ -145,6 +188,11 @@ public class PlayerController : MonoBehaviour
         {
             m_isFalling = false;
         }
+        else if(collision.gameObject.tag == "Coin")
+        {
+            PlayerStats.IncreaseGold(10);
+            Destroy(collision.gameObject);
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -155,5 +203,27 @@ public class PlayerController : MonoBehaviour
 
             Destroy(other.gameObject);
         }
+    }
+
+    public void UsePurchasedItem(ShopItemType t_itemType, string t_itemName)
+    {
+        switch(t_itemType)
+        {
+            case ShopItemType.Heal:
+                ApplyPickup("Heart");
+                break;
+            case ShopItemType.Poweup:
+                ApplyPickup(t_itemName);
+                break;
+            case ShopItemType.Weapon:
+                m_weaponName = t_itemName;
+                InitializeCamera();
+                break;
+        }
+    }
+
+    public string GetWeaponName()
+    {
+        return m_weaponName;
     }
 }

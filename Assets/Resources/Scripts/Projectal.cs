@@ -36,6 +36,9 @@ public class Projectal : MonoBehaviour
 
     Rigidbody m_rigidBody;
 
+    [SerializeField]
+    GameObject m_explosionPrefab;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -95,6 +98,9 @@ public class Projectal : MonoBehaviour
             case "Player":
                 PlayerStats.DealDamage(m_damage);
                 break;
+            case "Boss":
+                t_object.GetComponent<Boss>().TakeDamage(m_damage);
+                break;
             default:
                 break;
         }
@@ -102,18 +108,20 @@ public class Projectal : MonoBehaviour
 
     void OnCollisionEnter(Collision t_collision)
     {
-        if(t_collision.transform.tag != transform.tag)
+        if (m_isAreaEffect)
         {
-            if (m_isAreaEffect)
-            {
-                CreateExplosion();
-            }
-            else
-            {
-                DealDamage(t_collision.gameObject);
-            }
-
-            Destroy(gameObject);
+            CreateExplosion();
         }
+        else
+        {
+            DealDamage(t_collision.gameObject);
+        }
+
+        if(m_explosionPrefab != null)
+        {
+            Instantiate(m_explosionPrefab, transform.position, m_explosionPrefab.transform.rotation);
+        }
+
+        Destroy(gameObject);
     }
 }

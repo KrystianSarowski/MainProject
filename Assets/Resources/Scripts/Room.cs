@@ -8,7 +8,6 @@ public enum RoomType
     Boss,
     Combat,
     Powerup,
-    Empty
 }
 
 public class Room : MonoBehaviour
@@ -19,6 +18,8 @@ public class Room : MonoBehaviour
     bool m_isCleared = false;
     bool m_isLocked = false;
 
+    int m_powerUpIndex = 0;
+
     [SerializeField]
     GameObject m_doorPrefab;
 
@@ -27,6 +28,9 @@ public class Room : MonoBehaviour
 
     [SerializeField]
     GameObject m_bossPrefab;
+
+    [SerializeField]
+    GameObject m_shopkeeperPrefab;
 
     [SerializeField]
     GameObject m_exitPrefab;
@@ -42,8 +46,10 @@ public class Room : MonoBehaviour
     [SerializeField]
     public Vector3 m_position;
 
+    List<Vector3> m_doorPositions = new List<Vector3>();
+
     [SerializeField]
-    RoomType m_roomType = RoomType.Empty;
+    RoomType m_roomType = RoomType.Combat;
 
     [SerializeField]
     List<GameObject> m_pickUpPrefabs;
@@ -90,19 +96,16 @@ public class Room : MonoBehaviour
 
     public void SetRandomRoomType()
     {
-        int random = Random.Range(0, 100);
+        int random = GameplayManager.s_seedRandom.Next(0, 100);
 
-        if(random < 70)
+        if(random < 80)
         {
             m_roomType = RoomType.Combat;
         }
-        else if( random < 90)
+        else 
         {
             m_roomType = RoomType.Powerup;
-        }
-        else
-        {
-            m_roomType = RoomType.Empty;
+            m_powerUpIndex = GameplayManager.s_seedRandom.Next(0, 2);
         }
     }
 
@@ -149,6 +152,9 @@ public class Room : MonoBehaviour
             position.z = (exitIndex.m_y + 0.5f) * t_tileSize;
 
             Vector3 dirVector = t_nodePos - position;
+
+            m_doorPositions.Add(dirVector.normalized + position);
+
             float angle = Vector3.Angle(dirVector, Vector3.forward);
 
             GameObject door = Instantiate(m_doorPrefab, position, Quaternion.AngleAxis(angle, Vector3.up));
@@ -201,16 +207,94 @@ public class Room : MonoBehaviour
 
     void CreatePowerUp()
     {
-        GameObject pickupPrefab = m_pickUpPrefabs[Random.Range(0, 2)];
+        GameObject pickupPrefab = m_pickUpPrefabs[m_powerUpIndex];
 
         Instantiate(pickupPrefab, transform.position, pickupPrefab.transform.rotation);
+
+        SpawnShopkeeper();
 
         m_isCleared = true;
     }
 
+    void SpawnShopkeeper()
+    {
+        Vector3 pos = GenerateWallPosition(m_shopkeeperPrefab.transform.localScale);
+
+        Instantiate(m_shopkeeperPrefab, pos, m_shopkeeperPrefab.transform.rotation);
+    }
+
+    Vector3 GenerateWallPosition(Vector3 t_objectScale)
+    {
+        Vector3 pos = transform.position;
+        Vector3 offset = Vector3.zero;
+        Vector3 generatedPos = Vector3.zero;
+
+        bool valid = false;
+
+        int attemptCount = 0;
+
+        while (!valid && attemptCount < 30)
+        {
+            valid = true;
+
+            float value1 = Random.Range(-1.0f, 1.0f);
+            float value2 = Random.Range(0, 2);
+
+            if (value2 == 0)
+            {
+                value2 = -1;
+            }
+
+            int random = Random.Range(0, 2);
+
+            if (random == 0)
+            {
+                offset.x = m_size.x * value1;
+                offset.z = m_size.z * value2;
+            }
+            else
+            {
+                offset.x = m_size.x * value2;
+                offset.z = m_size.z * value1;
+            }
+
+            offset.y = -m_size.y + (t_objectScale.y / 2);
+
+            if (offset.x <= 0)
+            {
+                offset.x += t_objectScale.x / 2;
+            }
+            else
+            {
+                offset.x -= t_objectScale.x / 2;
+            }
+
+            if (offset.z <= 0)
+            {
+                offset.z += t_objectScale.z / 2;
+            }
+            else
+            {
+                offset.z -= t_objectScale.z / 2;
+            }
+
+            generatedPos = pos + offset;
+
+            foreach(Vector3 doorPos in m_doorPositions)
+            {
+                if((generatedPos - doorPos).magnitude < 1.2f)
+                {
+                    valid = false;
+                }
+            }
+        }
+
+        return generatedPos;
+    }
+
     void SpawnEnemies()
     {
-        int numOfEnemies = (int)(m_size.x * m_size.z / 7.5f);
+        int numOfEnemies = (int)(m_size.x * m_size.z / 4.0f);
 
         for (int i = 0; i < numOfEnemies; i++)
         {
@@ -221,7 +305,7 @@ public class Room : MonoBehaviour
             spawnPos.y += -m_size.y + (m_enemyPrefab.transform.localScale.y / 2);
 
             GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
-            enemy.GetComponent<Enemy>().SetRoom(this);
+            enemy.GetComponent<Enemy>().Initialize(this);
             enemy.transform.SetParent(transform);
             m_enemies.Add(enemy);
         }

@@ -18,12 +18,18 @@ public class Enemy : MonoBehaviour
     const float m_DETECT_RANGE = 2.0f;
     const float m_ATTACK_RANGE = 1.0f;
     const float m_WANDER_OFFSET = 0.6f;
-    const float m_MOVE_FORCE_STRENGTH = 13.0f;
+    const float m_MOVE_FORCE_STRENGTH = 15.0f;
     const float m_CLOSEST_DISTANCE = 0.5f;
     const float m_WANDER_RATE = 7.5f;
+    const float m_MAX_SPEED = 1.5f;
+    
+    const int m_ATTACK_DAMAGE = 6;
 
     [SerializeField]
     GameObject m_healPrefab;
+
+    [SerializeField]
+    GameObject m_goldExplosionPrefab;
 
     Room m_room = null;
 
@@ -67,7 +73,7 @@ public class Enemy : MonoBehaviour
         m_state = EnemyState.Idle;
     }
 
-    public void SetRoom(Room t_room)
+    public void Initialize(Room t_room)
     {
         m_roomCentre = t_room.m_position;
         m_roomSize = t_room.m_size;
@@ -103,6 +109,14 @@ public class Enemy : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if(collision.transform.tag == tag)
+        {
+            transform.position += (transform.position - collision.transform.position).normalized * 0.02f; 
         }
     }
 
@@ -211,9 +225,9 @@ public class Enemy : MonoBehaviour
 
         velocity.y = 0;
 
-        if (velocity.magnitude > 1.0f)
+        if (velocity.magnitude > m_MAX_SPEED)
         {
-            velocity = velocity.normalized * 1.0f;
+            velocity = velocity.normalized * m_MAX_SPEED;
         }
 
         velocity.y = m_rb.velocity.y;
@@ -332,7 +346,7 @@ public class Enemy : MonoBehaviour
 
         m_moveForce = 0.0f;
 
-        PlayerStats.DealDamage(5);
+        PlayerStats.DealDamage(m_ATTACK_DAMAGE);
 
         yield return new WaitForSeconds(1.0f);
 
@@ -371,29 +385,25 @@ public class Enemy : MonoBehaviour
         {
             int random = Random.Range(0, 100);
 
-            if(random < 20)
+            if(random < 5)
             {
                 GameObject heal =  Instantiate(m_healPrefab, transform.position, m_healPrefab.transform.rotation);
                 heal.transform.position += Vector3.up * 0.5f;
             }
 
-            Destroy(gameObject);
+            if(m_goldExplosionPrefab != null)
+            {
+                Instantiate(m_goldExplosionPrefab, transform.position, m_goldExplosionPrefab.transform.rotation);
+            }
 
+            Destroy(gameObject);
         }
         else
         {
             StartCoroutine(ChangeColour());
             m_bloodSystem.StartSystem();
+            m_state = EnemyState.Chasing;
         }
-    }
-
-    IEnumerator ChangeColour()
-    {
-        gameObject.GetComponent<MeshRenderer>().material = m_damagedMat;
-
-        yield return new WaitForSeconds(0.5f);
-
-        gameObject.GetComponent<MeshRenderer>().material = m_defaultMat;
     }
 
     public void PushBack(Vector3 t_sourcePos)
@@ -407,5 +417,14 @@ public class Enemy : MonoBehaviour
         m_rb.AddForce(pushBackDir * 10, ForceMode.Impulse);
 
         m_moveForce = 0.0f;
+    }
+
+    IEnumerator ChangeColour()
+    {
+        gameObject.GetComponent<MeshRenderer>().material = m_damagedMat;
+
+        yield return new WaitForSeconds(0.5f);
+
+        gameObject.GetComponent<MeshRenderer>().material = m_defaultMat;
     }
 }

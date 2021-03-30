@@ -32,12 +32,14 @@ public class Gun : Weapon
 
     public override void Initialize()
     {
+        base.Initialize();
+
         m_ammoCount = m_maxAmmo;
 
         if(m_isPlayerWeapon)
         {
             m_playerUI = FindObjectOfType<PlayerUI>();
-            m_playerUI.EnableAmmoText();
+            m_playerUI.EnableAmmoText(true);
             m_playerUI.UpdateAmmoText(m_ammoCount, m_maxAmmo);
         }
 

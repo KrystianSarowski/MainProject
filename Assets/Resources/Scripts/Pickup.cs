@@ -28,14 +28,9 @@ public class Pickup : MonoBehaviour
             position.y += m_HOVER_SPEED;
         }
 
-        m_count++;
+        m_count = (m_count + 1) % 60;
 
         transform.position = position;
-
-        if(m_count == 60)
-        {
-            m_count = 0;
-        }
     }
 
     public string GetName()
