@@ -5,10 +5,14 @@ using UnityEngine;
 [System.Serializable]
 public struct WeaponStats
 {
+    [HideInInspector]
     public float m_damageMultiplier;
+    public float m_defaultDamageMultiplier;
     public float m_damageMultiplierIncrease;
 
+    [HideInInspector]
     public float m_attackDelay;
+    public float m_defaultAttackDelay;
     public float m_minAttackDelay;
     public float m_decreaseAttackDelay;
 }
@@ -24,10 +28,6 @@ public class Weapon : MonoBehaviour
 
     public virtual void Initialize()
     {
-        if(FindObjectOfType<GameplayManager>().GetCurrentLevel() != 1)
-        {
-            m_stats = DataLoad.LoadWeaponData("Weapon");
-        }
     }
 
     public void SetWeaponStats(WeaponStats t_weaponStats)
@@ -48,9 +48,9 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void DecreaseAttackDelay()
+    public void DecreaseAttackDelay(int t_attackDelayLevel)
     {
-        m_stats.m_attackDelay -= m_stats.m_decreaseAttackDelay;
+        m_stats.m_attackDelay = m_stats.m_defaultAttackDelay - m_stats.m_decreaseAttackDelay * t_attackDelayLevel;
 
         if (m_stats.m_attackDelay < m_stats.m_minAttackDelay)
         {
@@ -58,13 +58,8 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public void IncreaseDamageMultiplier()
+    public void IncreaseDamageMultiplier(int t_damageMultiplierLevel)
     {
-        m_stats.m_damageMultiplier += m_stats.m_damageMultiplierIncrease;
-    }
-
-    public void SaveWeaponStats()
-    {
-        DataSave.SaveWeaponData(m_stats, "Weapon");
+        m_stats.m_damageMultiplier = m_stats.m_defaultDamageMultiplier + m_stats.m_damageMultiplierIncrease * t_damageMultiplierLevel;
     }
 }

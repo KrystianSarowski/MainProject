@@ -17,8 +17,11 @@ public class Room : MonoBehaviour
     //Has the room been cleared by the player or not.
     bool m_isCleared = false;
     bool m_isLocked = false;
+    bool m_spawnShopkeeper = false;
 
     int m_powerUpIndex = 0;
+    int m_width = 0;
+    int m_height = 0;
 
     [SerializeField]
     GameObject m_doorPrefab;
@@ -53,6 +56,9 @@ public class Room : MonoBehaviour
 
     [SerializeField]
     List<GameObject> m_pickUpPrefabs;
+
+    [SerializeField]
+    GameObject m_wallPrefab;
 
     void Update()
     {
@@ -109,15 +115,20 @@ public class Room : MonoBehaviour
         }
     }
 
+    public void SetSpawnShopkeeper(bool t_spawnShopkeeper)
+    {
+        m_spawnShopkeeper = t_spawnShopkeeper;
+    }
+
     public void ImplementLayout(float t_tileSize)
     {
         //The width of the layout minus the surrounding walls.
-        int width = m_layout.m_grid.m_width - 2;
+        m_width = m_layout.m_grid.m_width - 2;
 
         //The height of the layout minus the surrounding walls.
-        int height = m_layout.m_grid.m_height - 2;
+        m_height = m_layout.m_grid.m_height - 2;
 
-        GetComponent<BoxCollider>().size = new Vector3(width, 2, height);
+        GetComponent<BoxCollider>().size = new Vector3(m_width, 2, m_height);
 
         GridIndex indexPos = m_layout.GetNodePositonOnMap();
         
@@ -125,12 +136,12 @@ public class Room : MonoBehaviour
         
         m_position = nodePos;
         
-        if(width % 2 == 0)
+        if (m_width % 2 == 0)
         {
             m_position.x -= 0.5f * t_tileSize;
         }
 
-        if (height % 2 == 0)
+        if (m_height % 2 == 0)
         {
             m_position.z -= 0.5f * t_tileSize;
         }
@@ -182,6 +193,11 @@ public class Room : MonoBehaviour
             exitObject.transform.Rotate(Vector3.right * -90);
         }
 
+        if(m_spawnShopkeeper)
+        {
+            SpawnShopkeeper();
+        }
+
         m_isCleared = true;
         m_isLocked = false;
     }    
@@ -208,19 +224,29 @@ public class Room : MonoBehaviour
     void CreatePowerUp()
     {
         GameObject pickupPrefab = m_pickUpPrefabs[m_powerUpIndex];
-
         Instantiate(pickupPrefab, transform.position, pickupPrefab.transform.rotation);
-
-        SpawnShopkeeper();
-
         m_isCleared = true;
     }
 
     void SpawnShopkeeper()
     {
-        Vector3 pos = GenerateWallPosition(m_shopkeeperPrefab.transform.localScale);
+        bool validPos = false;
 
-        Instantiate(m_shopkeeperPrefab, pos, m_shopkeeperPrefab.transform.rotation);
+        Vector3 spawnPos = Vector3.zero;
+
+        while (!validPos)
+        {
+            spawnPos = GenerateWallPosition(m_shopkeeperPrefab.transform.localScale);
+
+            Collider[] objectColliders = Physics.OverlapBox(spawnPos, m_shopkeeperPrefab.transform.localScale * 0.49f);
+
+            if (objectColliders.Length == 1)
+            {
+                validPos = true;
+            }
+        }
+
+        Instantiate(m_shopkeeperPrefab, spawnPos, m_shopkeeperPrefab.transform.rotation);
     }
 
     Vector3 GenerateWallPosition(Vector3 t_objectScale)
@@ -298,16 +324,26 @@ public class Room : MonoBehaviour
 
         for (int i = 0; i < numOfEnemies; i++)
         {
-            Vector3 spawnPos = transform.position;
+            bool spawned = false;
 
-            spawnPos.x += Random.Range(-m_size.x, m_size.x);
-            spawnPos.z += Random.Range(-m_size.z, m_size.z);
-            spawnPos.y += -m_size.y + (m_enemyPrefab.transform.localScale.y / 2);
+            while(!spawned)
+            {
+                Vector3 spawnPos = transform.position;
 
-            GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
-            enemy.GetComponent<Enemy>().Initialize(this);
-            enemy.transform.SetParent(transform);
-            m_enemies.Add(enemy);
+                spawnPos.x += Random.Range(-m_size.x, m_size.x);
+                spawnPos.z += Random.Range(-m_size.z, m_size.z);
+                spawnPos.y += -m_size.y + (m_enemyPrefab.transform.localScale.y / 2);
+
+                Collider[] objectColliders = Physics.OverlapBox(spawnPos, m_enemyPrefab.transform.localScale * 0.49f);
+
+                if (objectColliders.Length == 1)
+                {
+                    GameObject enemy = Instantiate(m_enemyPrefab, spawnPos, Quaternion.identity);
+                    enemy.transform.SetParent(transform);
+                    m_enemies.Add(enemy);
+                    spawned = true;
+                }
+            }
         }
     }
 

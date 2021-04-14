@@ -5,7 +5,7 @@
             "m_itemName": "Heal",
             "m_itemType": 0,
             "m_isAvailable": true,
-            "m_isAvailable": false,
+            "m_isBought": false,
             "m_cost": 100
         },
         {
@@ -13,15 +13,31 @@
             "m_itemName": "Attack Speed",
             "m_itemType": 1,
             "m_isAvailable": true,
-            "m_isAvailable": false,
+            "m_isBought": false,
             "m_cost": 350
+        },
+        {
+            "m_shopSpriteName": "MovementSpeed",
+            "m_itemName": "MovementSpeed",
+            "m_itemType": 1,
+            "m_isAvailable": true,
+            "m_isBought": false,
+            "m_cost": 150
+        },
+        {
+            "m_shopSpriteName": "MaxHealthUp",
+            "m_itemName": "MaxHealth",
+            "m_itemType": 1,
+            "m_isAvailable": true,
+            "m_isBought": false,
+            "m_cost": 400
         },
         {
             "m_shopSpriteName": "DamageUp",
             "m_itemName": "Damage Up",
             "m_itemType": 1,
             "m_isAvailable": true,
-            "m_isAvailable": false,
+            "m_isBought": false,
             "m_cost": 325
         },
         {
@@ -29,15 +45,23 @@
             "m_itemName": "Pistol",
             "m_itemType": 2,
             "m_isAvailable": true,
-            "m_isAvailable": false,
-            "m_cost": 90
+            "m_isBought": false,
+            "m_cost": 450
+        },
+        {
+            "m_shopSpriteName": "Shotgun",
+            "m_itemName": "Shotgun",
+            "m_itemType": 2,
+            "m_isAvailable": true,
+            "m_isBought": false,
+            "m_cost": 860
         },
         {
             "m_shopSpriteName": "Sword",
             "m_itemName": "Sword",
             "m_itemType": 2,
             "m_isAvailable": true,
-            "m_isAvailable": false,
+            "m_isBought": false,
             "m_cost": 10
         }
     ]

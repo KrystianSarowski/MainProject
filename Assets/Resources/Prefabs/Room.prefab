@@ -59,7 +59,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_doorPrefab: {fileID: 8965023245911757771, guid: 7c2642fbe0f6bfe42888653cff9a549d,
     type: 3}
-  m_enemyPrefab: {fileID: 6063363458670044145, guid: ae53586334677254b98a0f2ee8247679,
+  m_enemyPrefab: {fileID: 1635886451029394347, guid: 6f24a748ece766f4c9ed43529bf262af,
     type: 3}
   m_bossPrefab: {fileID: 8207134400026370873, guid: d4b55e816788e7f4fba2d15940098114,
     type: 3}
@@ -74,3 +74,5 @@ MonoBehaviour:
   m_pickUpPrefabs:
   - {fileID: 1588229349274512182, guid: 2bb4d16c11c34e7429595c2f7c724a44, type: 3}
   - {fileID: 844585526067584695, guid: b1b1a71ba156eb144b9d42121dcc5378, type: 3}
+  m_wallPrefab: {fileID: 8551201213174193663, guid: b9f4561374ea83e40987901a9f11f133,
+    type: 3}

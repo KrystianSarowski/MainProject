@@ -334,7 +334,7 @@ RectTransform:
   m_Children:
   - {fileID: 1754087567}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -597,82 +597,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_sensetiivity: 0.96
   m_smoothing: 2
---- !u!1 &1068026372
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1068026374}
-  - component: {fileID: 1068026373}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1068026373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1068026372}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 603416ed175791e449dd90a19a75700c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_pariclePrefab: {fileID: 2343356841660997606, guid: 818d2c5532727b2448b841b96cf38c10,
-    type: 3}
-  m_initialSpeed: 10
-  m_maxParticleCount: 504
-  m_isContinues: 1
-  m_isRelative: 0
-  m_particleDelay: 0.001
-  m_isActive: 1
-  m_destoryAfterDelay: 0
-  m_timeToLive: 0
-  m_particleData:
-    m_timeToLive: 5
-    m_rotationSpeed: 2.1
-    m_changeSizeOverTime: 1
-    m_startSize: 1
-    m_finalSize: 0.001
-    m_changeColourOverTime: 1
-    m_startColour: {r: 1, g: 0, b: 0, a: 1}
-    m_endColour: {r: 0.7362523, g: 1, b: 0, a: 1}
-    m_useGravity: 0
-    m_moveWithParent: 1
-  m_emissionShape: 0
-  m_coneEmission:
-    m_maxRadius: 10
-    m_minRadius: 2
-    m_angle: 0
-    m_direction: {x: 0, y: 1, z: 1}
-  m_cubeEmission:
-    m_rotation: {x: 0, y: 0, z: 0}
-    m_scale: {x: 1, y: 2, z: 1}
-  m_sphereEmission:
-    m_maxRadius: 5
-    m_minRadius: 2
---- !u!4 &1068026374
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1068026372}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 109.23, y: 4.84375, z: 84.18799}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1088526212
 GameObject:
   m_ObjectHideFlags: 0
@@ -947,7 +871,7 @@ PrefabInstance:
     - target: {fileID: 4967812692315743383, guid: c7b4cb2e95704424a97b72237a7f9458,
         type: 3}
       propertyPath: m_seed
-      value: Demo03
+      value: Demo04
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c7b4cb2e95704424a97b72237a7f9458, type: 3}

@@ -95,8 +95,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_stats:
     m_damageMultiplier: 1
+    m_defaultDamageMultiplier: 1
     m_damageMultiplierIncrease: 0.1
     m_attackDelay: 0.5
+    m_defaultAttackDelay: 0.5
     m_minAttackDelay: 0.1
     m_decreaseAttackDelay: 0.05
   m_spawnOffset: {x: -0.15, y: 0, z: 0}

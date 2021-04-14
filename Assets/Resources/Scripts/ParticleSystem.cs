@@ -108,6 +108,13 @@ public class ParticleSystem : MonoBehaviour
             EmitParticles(1);
             m_currentTime = 0.0f;
         }
+
+        m_isActive = true;
+    }
+
+    public void StopSystem()
+    {
+        m_isActive = false;
     }
 
     void FireParticle(Vector3 t_direction, Vector3 t_position)

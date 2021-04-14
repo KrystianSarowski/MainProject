@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class UpgradeLevels
+{
+    public int m_attackSpeedLevel = 0;
+    public int m_damageMultiplierLevel = 0;
+    public int m_maxHealthLevel = 0;
+    public int m_maxSpeedLevel = 0;
+}
+
 public class PlayerController : MonoBehaviour
 {
     [Range(0.1f, 100.0f)]
@@ -10,7 +19,7 @@ public class PlayerController : MonoBehaviour
 
     [Range(0.1f, 10.0f)]
     [SerializeField]
-    float m_maxSpeed = 5.0f;     //The max speed at which the player can travel.
+    float m_baseMaxSpeed = 5.0f;     //The max speed at which the player can travel.
 
     [Range(0.1f, 5.0f)]
     [SerializeField]
@@ -20,6 +29,8 @@ public class PlayerController : MonoBehaviour
     string m_weaponName;
 
     float m_interactRange = 1.0f;
+    float m_maxSpeed = 5.0f;
+    float m_maxSpeedIncrease = 0.2f;
 
     bool m_isFalling;
 
@@ -28,11 +39,15 @@ public class PlayerController : MonoBehaviour
 
     Weapon m_weapon;
 
+    UpgradeLevels m_upgradeLevels = new UpgradeLevels();
+
     PlayerUI m_playerUI;
 
     //Start is called before the first frame update
     void Start()
     {
+        m_maxSpeed = m_baseMaxSpeed;
+
         m_rb = GetComponent<Rigidbody>();
         m_playerUI = GetComponent<PlayerUI>();
 
@@ -65,9 +80,14 @@ public class PlayerController : MonoBehaviour
 
         weaponObject.transform.SetParent(t_camera.transform);
 
+        if (FindObjectOfType<GameplayManager>().GetCurrentLevel() != 1)
+        {
+            m_upgradeLevels = DataLoad.LoadUpgradeData("Upgrades");
+        }
+
         m_weapon = weaponObject.GetComponent<Weapon>();
         m_weapon.Initialize();
-        m_weapon.SaveWeaponStats();
+        ApplyUpgrades();
     }
 
     //Update is called once per frame
@@ -145,7 +165,7 @@ public class PlayerController : MonoBehaviour
 
         if (velocity.magnitude > m_maxSpeed)
         {
-            velocity = velocity.normalized * m_maxSpeed;
+            velocity = velocity.normalized * m_baseMaxSpeed;
             m_rb.velocity = new Vector3(velocity.x, m_rb.velocity.y, velocity.y);
         } 
     }
@@ -170,16 +190,38 @@ public class PlayerController : MonoBehaviour
                 PlayerStats.DealDamage(-20);
                 break;
             case "DamageUp":
-                m_weapon.IncreaseDamageMultiplier();
-                m_weapon.SaveWeaponStats();
+                m_upgradeLevels.m_damageMultiplierLevel++;
+                ApplyUpgrades();
                 break;
             case "AttackSpeed":
-                m_weapon.DecreaseAttackDelay();
-                m_weapon.SaveWeaponStats();
+                m_upgradeLevels.m_attackSpeedLevel++;
+                ApplyUpgrades();
+                break;
+            case "MovementSpeed":
+                ApplyUpgrades();
+                break;
+            case "MaxHealth":
+                ApplyUpgrades();
                 break;
             default:
                 break;
         }
+    }
+
+    void ApplyUpgrades()
+    {
+        m_weapon.IncreaseDamageMultiplier(m_upgradeLevels.m_damageMultiplierLevel);
+        m_weapon.DecreaseAttackDelay(m_upgradeLevels.m_attackSpeedLevel);
+        PlayerStats.IncreaseMaxHealth(m_upgradeLevels.m_maxHealthLevel);
+
+        UpdateMaxSpeed();
+
+        DataSave.SaveUpgradeData(m_upgradeLevels, "Upgrades");
+    }
+
+    void UpdateMaxSpeed()
+    {
+        m_maxSpeed = m_baseMaxSpeed + (m_maxSpeedIncrease * m_upgradeLevels.m_maxSpeedLevel);
     }
 
     void OnCollisionEnter(Collision collision)
@@ -226,4 +268,5 @@ public class PlayerController : MonoBehaviour
     {
         return m_weaponName;
     }
+
 }

@@ -1,0 +1,177 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2439933550988219288
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2439933550988219283}
+  - component: {fileID: 2439933550988219286}
+  - component: {fileID: 2439933550988219287}
+  - component: {fileID: 2439933550988219285}
+  - component: {fileID: 8789172563873272686}
+  - component: {fileID: 1338678146066660714}
+  m_Layer: 2
+  m_Name: Fireball
+  m_TagString: Projectal
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2439933550988219283
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 37.532227, y: 11.173828, z: 37.54297}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &2439933550988219286
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2439933550988219287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603416ed175791e449dd90a19a75700c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_pariclePrefab: {fileID: 8432021628474152195, guid: 5c270e98189d1eb4295b588a34f2d61a,
+    type: 3}
+  m_initialSpeed: 0.1
+  m_maxParticleCount: 200
+  m_isContinues: 1
+  m_isRelative: 1
+  m_particleDelay: 0
+  m_isActive: 1
+  m_destoryAfterDelay: 0
+  m_timeToLive: 0
+  m_particleData:
+    m_timeToLive: 2
+    m_rotationSpeed: 4
+    m_changeSizeOverTime: 1
+    m_startSize: 0.06
+    m_finalSize: 0.001
+    m_changeColourOverTime: 1
+    m_startColour: {r: 1, g: 0, b: 0, a: 1}
+    m_endColour: {r: 1, g: 0.77660096, b: 0, a: 1}
+    m_useGravity: 0
+    m_moveWithParent: 1
+  m_emissionShape: 2
+  m_coneEmission:
+    m_maxRadius: 0
+    m_minRadius: 0
+    m_angle: 0
+    m_direction: {x: 0, y: 0, z: 0}
+  m_cubeEmission:
+    m_rotation: {x: 0, y: 0, z: 0}
+    m_scale: {x: 0, y: 0, z: 0}
+  m_sphereEmission:
+    m_maxRadius: 0.1
+    m_minRadius: 0
+--- !u!114 &2439933550988219285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603416ed175791e449dd90a19a75700c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_pariclePrefab: {fileID: 8432021628474152195, guid: 114bb7cad97673949aba095d4c6cc640,
+    type: 3}
+  m_initialSpeed: 1
+  m_maxParticleCount: 80
+  m_isContinues: 1
+  m_isRelative: 1
+  m_particleDelay: 0
+  m_isActive: 1
+  m_destoryAfterDelay: 0
+  m_timeToLive: 0
+  m_particleData:
+    m_timeToLive: 0.4
+    m_rotationSpeed: 4
+    m_changeSizeOverTime: 1
+    m_startSize: 0.06
+    m_finalSize: 0.01
+    m_changeColourOverTime: 1
+    m_startColour: {r: 1, g: 0, b: 0, a: 1}
+    m_endColour: {r: 1, g: 0.77660096, b: 0, a: 1}
+    m_useGravity: 0
+    m_moveWithParent: 0
+  m_emissionShape: 0
+  m_coneEmission:
+    m_maxRadius: 0.1
+    m_minRadius: 0
+    m_angle: 10
+    m_direction: {x: 0, y: 0, z: -1}
+  m_cubeEmission:
+    m_rotation: {x: 0, y: 0, z: 0}
+    m_scale: {x: 0, y: 0, z: 0}
+  m_sphereEmission:
+    m_maxRadius: 0
+    m_minRadius: 0
+--- !u!114 &8789172563873272686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3be5aa021417dee409b690e9c245c42f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_speed: 1
+  m_timeToLive: 10
+  m_damageFallOffRange: 10
+  m_damageAreaRange: 0
+  m_damageFallOff: 0
+  m_baseMinDamage: 8
+  m_baseDamage: 8
+  m_isAreaEffect: 0
+  m_explosionPrefab: {fileID: 0}
+--- !u!54 &1338678146066660714
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2439933550988219288}
+  serializedVersion: 2
+  m_Mass: 0.5
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

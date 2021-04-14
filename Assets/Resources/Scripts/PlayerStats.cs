@@ -8,6 +8,9 @@ public class PlayerStats
     public static int s_maxHealth = 100;
     public static int s_gold = 1000;
 
+    static int s_baseMaxHealth = 100;
+    static int s_maxHealthIncrease = 10;
+
     public static void DealDamage(int t_damage)
     {
         s_health -= t_damage;
@@ -22,9 +25,18 @@ public class PlayerStats
         }
     }
 
-    public static void IncreaseMaxHealth(int t_increase)
+    public static void IncreaseMaxHealth(int t_maxHealthLevel)
     {
-        s_maxHealth += t_increase;
+        int previousValue = s_maxHealth;
+
+        s_maxHealth = s_baseMaxHealth + s_maxHealthIncrease * t_maxHealthLevel;
+
+        s_health = (int)(s_health * (s_maxHealth / (float)previousValue));
+
+        if(s_health > s_maxHealth)
+        {
+            s_health = s_maxHealth;
+        }
     }
 
     public static void IncreaseGold(int t_goldAmount)

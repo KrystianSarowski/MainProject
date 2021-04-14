@@ -15,6 +15,7 @@ TagManager:
   - Shop
   - Shopkeeper
   - Coin
+  - Particle
   layers:
   - Default
   - TransparentFX

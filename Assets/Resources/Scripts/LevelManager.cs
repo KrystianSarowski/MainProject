@@ -26,18 +26,12 @@ public class LevelManager : MonoBehaviour
     [Range(1.0f, 4.0f)]
     public float m_wallHeight;
 
-    float m_halfTileSize;
-
     public Material m_floorMaterial;
     public Material m_ceilingMaterial;
-
-    bool drawAllArcs = false;
 
     //Start is called before the first frame update
     void Start()
     {
-        m_halfTileSize = m_tileSize / 2.0f;
-
         m_mapGrid = new TileGrid(m_levelWidth, m_levelHight);
         m_mapGrid.CreateTileGrid();
 
@@ -82,6 +76,7 @@ public class LevelManager : MonoBehaviour
         BuildRooms();
         SpawnPlayer();
         SpawnExit();
+        SetShopKeepers();
 
         yield return null;
     }
@@ -103,6 +98,7 @@ public class LevelManager : MonoBehaviour
         BuildRooms();
         SpawnPlayer();
         SpawnExit();
+        SetShopKeepers();
 
         yield return null;
     }
@@ -155,6 +151,28 @@ public class LevelManager : MonoBehaviour
 
                 m_rooms.Add(room.GetComponent<Room>());
             }
+        }
+    }
+
+    void SetShopKeepers()
+    {
+        int shopKeeperCount = 0;
+
+        foreach (Room room in m_rooms)
+        {
+            int random = GameplayManager.s_seedRandom.Next(0, 100);
+
+            if(random < 100)
+            {
+                room.SetSpawnShopkeeper(true);
+                shopKeeperCount++;
+            }
+        }
+
+        if(shopKeeperCount == 0)
+        {
+            int random = GameplayManager.s_seedRandom.Next(1, m_rooms.Count - 2);
+            m_rooms[random].SetSpawnShopkeeper(true);
         }
     }
 }

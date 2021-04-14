@@ -36,6 +36,7 @@ public class RoomLayout
         m_grid.SetTileType(m_nodePosIndex, TileType.Node);
 
         CreatePossibleExits();
+        CreateInnerWalls();
     }
 
     void FillLayout()
@@ -102,6 +103,75 @@ public class RoomLayout
         m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, 0));
         m_possibleExitList.Add(new GridIndex(m_grid.m_width - 1, m_nodePosIndex.m_y));
         m_possibleExitList.Add(new GridIndex(m_nodePosIndex.m_x, m_grid.m_height - 1));
+    }
+
+    void CreateInnerWalls()
+    {
+        if(m_grid.m_height != m_MIN_SIZE && m_grid.m_width != m_MIN_SIZE)
+        {
+            int roomDesignIndex = GameplayManager.s_seedRandom.Next(0, 4);
+
+            switch (roomDesignIndex)
+            {
+                case 0:
+                    {
+                        int yOffset = Mathf.CeilToInt((m_grid.m_height / 2) / 2.0f);
+                        for (int x = 2; x < m_grid.m_width - 2; x++)
+                        {
+                            m_grid.SetTileType(new GridIndex(x, yOffset), TileType.Wall);
+                            m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.Wall);
+                        }
+                    }
+                    break;
+                case 1:
+                    {
+                        int xOffset = Mathf.CeilToInt((m_grid.m_width / 2) / 2.0f);
+                        for (int y = 2; y < m_grid.m_height - 2; y++)
+                        {
+                            m_grid.SetTileType(new GridIndex(xOffset, y), TileType.Wall);
+                            m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.Wall);
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        int xOffset = Mathf.CeilToInt((m_grid.m_width / 2) / 2.0f);
+                        for (int y = 2; y < m_grid.m_height - 2; y++)
+                        {
+                            if (y != m_nodePosIndex.m_y)
+                            {
+                                m_grid.SetTileType(new GridIndex(xOffset, y), TileType.Wall);
+                                m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.Wall);
+                            }
+                        }
+
+                        int yOffset = Mathf.CeilToInt((m_grid.m_height / 2) / 2.0f);
+                        for (int x = 2; x < m_grid.m_width - 2; x++)
+                        {
+                            if(x != m_nodePosIndex.m_x)
+                            {
+                                m_grid.SetTileType(new GridIndex(x, yOffset), TileType.Wall);
+                                m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.Wall);
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+
+                        int xOffset = GameplayManager.s_seedRandom.Next(1, (m_grid.m_width - 4) / 2);
+                        int yOffset = GameplayManager.s_seedRandom.Next(1, (m_grid.m_height - 4) / 2);
+
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y - yOffset), TileType.Wall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y - yOffset), TileType.Wall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y + yOffset), TileType.Wall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y + yOffset), TileType.Wall);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public List<GridIndex> GetPossibleExitsOnMap()

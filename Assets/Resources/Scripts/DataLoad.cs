@@ -10,7 +10,7 @@ class ShopItemsData
 
 public class DataLoad
 {
-    public static WeaponStats LoadWeaponData(string t_fileName)
+    public static UpgradeLevels LoadUpgradeData(string t_fileName)
     {
         string fullPath = "SaveData/" + t_fileName;
 
@@ -18,12 +18,12 @@ public class DataLoad
 
         if (loadFile != null)
         {
-            WeaponStats loadedLevel = JsonUtility.FromJson<WeaponStats>(loadFile.text);
+            UpgradeLevels upgradeLevels = JsonUtility.FromJson<UpgradeLevels>(loadFile.text);
 
-            return loadedLevel;
+            return upgradeLevels;
         }
 
-        return new WeaponStats();
+        return new UpgradeLevels();
     }
 
     public static List<ShopItem> LoadShopItems(string t_fileName)

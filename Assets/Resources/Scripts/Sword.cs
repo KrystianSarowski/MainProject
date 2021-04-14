@@ -78,8 +78,8 @@ public class Sword : Weapon
                 {
                     if (hit.collider.tag == "Enemy")
                     {
-                        hit.collider.GetComponent<Enemy>().PushBack(transform.position);
                         hit.collider.GetComponent<Enemy>().TakeDamage((int)(m_baseDamage * m_stats.m_damageMultiplier));
+                        hit.collider.GetComponent<Enemy>().PushBack(transform.position);
                     }
                 }
             }
