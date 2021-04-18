@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
         m_playerUI.Initialize();
 
+        m_weaponName = PlayerStats.GetWeaponName();
+
         InitializeCamera();
     }
 
@@ -110,6 +112,11 @@ public class PlayerController : MonoBehaviour
         if(PlayerStats.s_health <= 0)
         {
             GameplayManager.LoadScene("GameoverScene");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameplayManager.LoadScene("MenuScene");
         }
 
         m_playerUI.UpdateHealthBar(PlayerStats.s_health);
@@ -258,6 +265,7 @@ public class PlayerController : MonoBehaviour
                 ApplyPickup(t_itemName);
                 break;
             case ShopItemType.Weapon:
+                PlayerStats.SetWeaponName(t_itemName);
                 m_weaponName = t_itemName;
                 InitializeCamera();
                 break;

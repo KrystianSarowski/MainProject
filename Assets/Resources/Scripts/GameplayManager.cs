@@ -43,7 +43,6 @@ public class GameplayManager : MonoBehaviour
             s_instance = this;
             DontDestroyOnLoad(gameObject);
             s_seedRandom = new System.Random(m_seed.GetHashCode());
-            m_generationType = GenerationType.BottomUp;
         }
     }
 

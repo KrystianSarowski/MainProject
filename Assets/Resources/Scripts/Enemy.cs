@@ -30,8 +30,8 @@ public class Enemy : MonoBehaviour
     const float s_RANGED_ATTACK_DELAY = 1.0f;
     const float s_RANGED_ATTACK_RANGE = 3.0f;
     const float s_VISION_RANGE = 5.0f;
-    const float s_MAX_SPEED = 1.75f;
-    const float s_ACCELERATION_STRENGTH = 12.0f;
+    const float s_MAX_SPEED = 2.0f;
+    const float s_ACCELERATION_STRENGTH = 15.0f;
     const float s_WANDER_RATE = 7.5f;
     const float s_WANDER_OFFSET = 0.6f;
     const float s_MELEE_RANGE = 1.0f;
@@ -44,9 +44,10 @@ public class Enemy : MonoBehaviour
     int m_meleeDamage = 2;
 
     float m_angle;
-    float m_health = 10;
+    float m_health = 50;
     float m_wanderOrientation = 0.0f;
     float m_attackCooldown;
+    float m_damageMultiplier;
 
     bool m_move = true;
     bool m_turnAround = false;
@@ -76,12 +77,6 @@ public class Enemy : MonoBehaviour
     Transform m_projectalOrigin;
 
     [SerializeField]
-    Material m_defaultMat;
-
-    [SerializeField]
-    Material m_damagedMat;
-
-    [SerializeField]
     ParticleSystem m_bloodSystem;    
     
     [SerializeField]
@@ -109,6 +104,9 @@ public class Enemy : MonoBehaviour
         m_ignoreList.Add("Projectal");
         m_ignoreList.Add("Particle");
         m_ignoreList.Add("Coin");
+
+        m_health = m_health * FindObjectOfType<GameplayManager>().GetCurrentLevel();
+        m_damageMultiplier = FindObjectOfType<GameplayManager>().GetCurrentLevel();
     }
 
     // Update is called once per frame
@@ -153,6 +151,15 @@ public class Enemy : MonoBehaviour
     {
         m_previousState = m_currentState;
         m_currentState = t_newState;
+
+        switch (m_previousState)
+        {
+            case EnemyState.MeleeAttack:
+                m_fireBreathSystem.StopSystem();
+                break;
+            default:
+                break;
+        }
 
         switch (m_currentState)
         {
@@ -208,6 +215,11 @@ public class Enemy : MonoBehaviour
         if (m_move)
         {
             CalculateAcceleration();
+
+            if(m_rb.velocity.magnitude == 0)
+            {
+                m_rb.velocity = transform.TransformDirection(Vector3.forward) * 0.001f;
+            }
 
             m_rb.AddForce(m_acceleration, ForceMode.Acceleration);
 
@@ -449,7 +461,7 @@ public class Enemy : MonoBehaviour
             {
                 if ((m_targetPosition - transform.position).magnitude < s_MELEE_RANGE + 0.1f)
                 {
-                    PlayerStats.DealDamage(m_meleeDamage);
+                    PlayerStats.DealDamage((int)(m_meleeDamage * m_damageMultiplier));
                 }
                 else
                 {
@@ -494,7 +506,7 @@ public class Enemy : MonoBehaviour
                 else
                 {
                     GameObject fireBall = Instantiate(m_fireballPrefab, m_projectalOrigin.position, m_fireballPrefab.transform.rotation);
-                    fireBall.GetComponent<Projectal>().Fire((m_targetPosition + new Vector3(0, 0.25f, 0) - m_projectalOrigin.position).normalized, 1);
+                    fireBall.GetComponent<Projectal>().Fire((m_targetPosition + new Vector3(0, 0.25f, 0) - m_projectalOrigin.position).normalized, m_damageMultiplier);
                 }
 
                 m_attackCooldown = s_RANGED_ATTACK_DELAY;
@@ -583,7 +595,6 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ChangeColour());
             m_bloodSystem.StartSystem();
             m_targetPosition = m_player.transform.position;
             SetCurrentState(EnemyState.Chase);
@@ -613,15 +624,6 @@ public class Enemy : MonoBehaviour
         {
             Destroy(collision.gameObject);
         }
-    }
-
-    IEnumerator ChangeColour()
-    {
-        gameObject.GetComponent<MeshRenderer>().material = m_damagedMat;
-
-        yield return new WaitForSeconds(0.5f);
-
-        gameObject.GetComponent<MeshRenderer>().material = m_defaultMat;
     }
 
 }

@@ -11,6 +11,8 @@ public class PlayerStats
     static int s_baseMaxHealth = 100;
     static int s_maxHealthIncrease = 10;
 
+    static string s_weaponName = "Sword";
+
     public static void DealDamage(int t_damage)
     {
         s_health -= t_damage;
@@ -47,5 +49,15 @@ public class PlayerStats
     public static void DecreaseGold(int t_goldAmount)
     {
         s_gold -= t_goldAmount;
+    }
+
+    public static void SetWeaponName(string t_weaponName)
+    {
+        s_weaponName = t_weaponName;
+    }
+
+    public static string GetWeaponName()
+    {
+        return s_weaponName;
     }
 }

@@ -12,9 +12,10 @@ public enum BossStateType
 
 public class Boss : MonoBehaviour
 {
+    const float s_COLLISION_VISION_RANGE = 2.0f;
+
     [SerializeField]
-    int m_currentHealth = 100;
-    int m_previousHealth = 100;
+    int m_currentHealth = 500;
     int m_stateIndex = 0;
 
     float m_maxWalkVelocity = 1.5f;
@@ -48,7 +49,6 @@ public class Boss : MonoBehaviour
     {
         m_room = t_room;
         m_playerTransform = t_playerTransform;
-        m_previousHealth = m_currentHealth;
 
         m_bossStates.Add(new BossDefenceState());
         m_bossStates.Add(new BossAttackState());
@@ -61,6 +61,8 @@ public class Boss : MonoBehaviour
         }
 
         m_rb = GetComponent<Rigidbody>();
+
+        m_currentHealth = m_currentHealth * FindObjectOfType<GameplayManager>().GetCurrentLevel();
     }
 
     void FixedUpdate()
@@ -68,8 +70,6 @@ public class Boss : MonoBehaviour
         LookAtPlayer();
         m_bossStates[m_stateIndex].Update();
         LimitVelocity();
-
-        m_previousHealth = m_currentHealth;
     }
 
     void LookAtPlayer()
@@ -110,14 +110,20 @@ public class Boss : MonoBehaviour
         m_rb.velocity = velocity;
     }
 
-    public bool IsWithinRoom(Vector3 t_position)
+    public bool IsThereWall(Vector3 t_dir)
     {
-        Vector3 pos = m_room.m_position - t_position;
-        Vector3 roomSize = m_room.m_size;
+        Ray ray = new Ray(transform.position, t_dir);
+        RaycastHit hit;
 
-        if(Mathf.Abs(pos.z) < roomSize.z && Mathf.Abs(pos.x) < roomSize.x)
+        if (Physics.Raycast(ray, out hit))
         {
-            return true;
+            if (hit.distance <= s_COLLISION_VISION_RANGE)
+            {
+                if(hit.collider.tag == "Wall")
+                {
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -343,9 +349,8 @@ public class BossDefenceState : BossState
     public override void Update()
     {
         Vector3 dir = m_boss.transform.TransformDirection(m_moveDir).normalized;
-        Vector3 bodyPos = m_boss.transform.position;
 
-        if (!m_boss.IsWithinRoom(dir + bodyPos) || m_moveDir == Vector3.zero)
+        if (m_boss.IsThereWall(dir) || m_moveDir == Vector3.zero)
         {
             SetNewMoveDir();
         }
@@ -359,9 +364,8 @@ public class BossDefenceState : BossState
     void SetNewMoveDir()
     {
         Vector3 dir = m_boss.transform.TransformDirection(Vector3.left).normalized;
-        Vector3 bodyPos = m_boss.transform.position;
 
-        if (m_boss.IsWithinRoom(dir + bodyPos))
+        if (!m_boss.IsThereWall(dir))
         {
             m_moveDir = Vector3.left;
             return;
@@ -369,7 +373,7 @@ public class BossDefenceState : BossState
 
         dir = m_boss.transform.TransformDirection(Vector3.right).normalized;
 
-        if (m_boss.IsWithinRoom(dir + bodyPos))
+        if (!m_boss.IsThereWall(dir))
         {
             m_moveDir = Vector3.right;
             return;

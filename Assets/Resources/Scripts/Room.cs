@@ -19,9 +19,9 @@ public class Room : MonoBehaviour
     bool m_isLocked = false;
     bool m_spawnShopkeeper = false;
 
-    int m_powerUpIndex = 0;
-    int m_width = 0;
-    int m_height = 0;
+    int m_powerUpIndex = 0;     //The index of the powerup that has been selected from the possible power ups.
+    int m_width = 0;            //The width of the room.
+    int m_height = 0;           //The height of the room.
 
     [SerializeField]
     GameObject m_doorPrefab;
@@ -98,20 +98,10 @@ public class Room : MonoBehaviour
     public void SetRoomType(RoomType t_roomType)
     {
         m_roomType = t_roomType;
-    }
 
-    public void SetRandomRoomType()
-    {
-        int random = GameplayManager.s_seedRandom.Next(0, 100);
-
-        if(random < 80)
+        if(m_roomType == RoomType.Powerup)
         {
-            m_roomType = RoomType.Combat;
-        }
-        else 
-        {
-            m_roomType = RoomType.Powerup;
-            m_powerUpIndex = GameplayManager.s_seedRandom.Next(0, 2);
+            m_powerUpIndex = GameplayManager.s_seedRandom.Next(0, 4);
         }
     }
 
@@ -149,6 +139,7 @@ public class Room : MonoBehaviour
         transform.position = m_position;
 
         PlaceDoors(t_tileSize, nodePos);
+        PlaceInnerWallColliders();
     }
 
     void PlaceDoors(float t_tileSize, Vector3 t_nodePos)
@@ -231,12 +222,12 @@ public class Room : MonoBehaviour
     void SpawnShopkeeper()
     {
         bool validPos = false;
-
+        float rotation = 0;
         Vector3 spawnPos = Vector3.zero;
 
         while (!validPos)
         {
-            spawnPos = GenerateWallPosition(m_shopkeeperPrefab.transform.localScale);
+            spawnPos = GenerateWallPosition(m_shopkeeperPrefab.transform.localScale, ref rotation);
 
             Collider[] objectColliders = Physics.OverlapBox(spawnPos, m_shopkeeperPrefab.transform.localScale * 0.49f);
 
@@ -246,10 +237,42 @@ public class Room : MonoBehaviour
             }
         }
 
-        Instantiate(m_shopkeeperPrefab, spawnPos, m_shopkeeperPrefab.transform.rotation);
+        GameObject shopkeeper = Instantiate(m_shopkeeperPrefab, spawnPos, m_shopkeeperPrefab.transform.rotation);
+        shopkeeper.transform.Rotate(Vector3.up, rotation);
     }
 
-    Vector3 GenerateWallPosition(Vector3 t_objectScale)
+    void PlaceInnerWallColliders()
+    {
+        GridIndex nodeIndex = m_layout.m_nodePosIndex;
+
+        for (int x = 0; x < m_width; x++)
+        {
+            for(int y = 0; y < m_height; y++)
+            {
+                GridIndex indexPos = new GridIndex(x, y);
+
+                if(m_layout.m_grid.GetTile(indexPos).GetTileType() == TileType.InnerWall)
+                {
+                    Vector3 position = new Vector3(indexPos.m_x - nodeIndex.m_x, 0, indexPos.m_y - nodeIndex.m_y);
+
+                    if (m_width % 2 == 0)
+                    {
+                        position.x += 0.5f;
+                    }
+
+                    if (m_height % 2 == 0)
+                    {
+                        position.z += 0.5f;
+                    }
+
+                    GameObject wall = Instantiate(m_wallPrefab, transform.position + position, m_wallPrefab.transform.rotation);
+                    wall.transform.SetParent(transform);
+                }
+            }
+        }
+    }
+
+    Vector3 GenerateWallPosition(Vector3 t_objectScale, ref float t_rotation)
     {
         Vector3 pos = transform.position;
         Vector3 offset = Vector3.zero;
@@ -277,11 +300,29 @@ public class Room : MonoBehaviour
             {
                 offset.x = m_size.x * value1;
                 offset.z = m_size.z * value2;
+
+                if(value2 == 1)
+                {
+                    t_rotation = 180;
+                }
+                else
+                {
+                    t_rotation = 0;
+                }
             }
             else
             {
                 offset.x = m_size.x * value2;
                 offset.z = m_size.z * value1;
+
+                if (value2 == 1)
+                {
+                    t_rotation = -90;
+                }
+                else
+                {
+                    t_rotation = 90;
+                }
             }
 
             offset.y = -m_size.y + (t_objectScale.y / 2);

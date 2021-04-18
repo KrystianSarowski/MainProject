@@ -46,7 +46,7 @@ MonoBehaviour:
   m_pariclePrefab: {fileID: 394801076601641624, guid: a75763859d5c06e428301d17e126cc91,
     type: 3}
   m_initialSpeed: 1
-  m_maxParticleCount: 10
+  m_maxParticleCount: 6
   m_isContinues: 0
   m_isRelative: 0
   m_particleDelay: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
   m_destoryAfterDelay: 1
   m_timeToLive: 20
   m_particleData:
-    m_timeToLive: 20
+    m_timeToLive: 10
     m_rotationSpeed: 0
     m_changeSizeOverTime: 0
     m_startSize: 0.5

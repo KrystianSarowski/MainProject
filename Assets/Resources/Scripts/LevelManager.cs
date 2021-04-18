@@ -26,8 +26,17 @@ public class LevelManager : MonoBehaviour
     [Range(1.0f, 4.0f)]
     public float m_wallHeight;
 
+    [Range(1.0f, 4.0f)]
+    public float m_innerWallHeight;
+
     public Material m_floorMaterial;
     public Material m_ceilingMaterial;
+
+    [SerializeField]
+    MeshGenerator m_wallsGenerator;
+
+    [SerializeField]
+    MeshGenerator m_innerWallGenerator;
 
     //Start is called before the first frame update
     void Start()
@@ -70,13 +79,17 @@ public class LevelManager : MonoBehaviour
         TopDownGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         TopDownGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
-        MeshGenerator meshGen = GetComponent<MeshGenerator>();
-        meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
+        RemoveBossRoomInnerWalls();
+
+        m_wallsGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight, TileType.Wall);
+        m_innerWallGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_innerWallHeight, TileType.InnerWall);
+
         CreateCeilingAndFloor();
         BuildRooms();
         SpawnPlayer();
         SpawnExit();
         SetShopKeepers();
+        SetPowerUpRooms();
 
         yield return null;
     }
@@ -92,13 +105,17 @@ public class LevelManager : MonoBehaviour
         BottomUpGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         BottomUpGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
-        MeshGenerator meshGen = GetComponent<MeshGenerator>();
-        meshGen.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight);
+        RemoveBossRoomInnerWalls();
+
+        m_wallsGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight, TileType.Wall);
+        m_innerWallGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_innerWallHeight, TileType.InnerWall);
+
         CreateCeilingAndFloor();
         BuildRooms();
         SpawnPlayer();
         SpawnExit();
         SetShopKeepers();
+        SetPowerUpRooms();
 
         yield return null;
     }
@@ -146,9 +163,8 @@ public class LevelManager : MonoBehaviour
                 GameObject room = Instantiate(m_roomPrefab, transform);
                 room.GetComponent<Room>().SetLayout(layout);
                 room.GetComponent<Room>().ImplementLayout(m_tileSize);
-                room.GetComponent<Room>().SetRandomRoomType();
+                room.GetComponent<Room>().SetRoomType(RoomType.Combat);
                 room.GetComponent<Room>().SetRoomSize();
-
                 m_rooms.Add(room.GetComponent<Room>());
             }
         }
@@ -171,8 +187,63 @@ public class LevelManager : MonoBehaviour
 
         if(shopKeeperCount == 0)
         {
-            int random = GameplayManager.s_seedRandom.Next(1, m_rooms.Count - 2);
+            int random = GameplayManager.s_seedRandom.Next(1, m_rooms.Count - 1);
             m_rooms[random].SetSpawnShopkeeper(true);
+        }
+    }
+
+    void SetPowerUpRooms()
+    {
+        int roomCount = 0;
+
+        for(int i = 1; i < m_rooms.Count - 1; i++)
+        {
+            int random = GameplayManager.s_seedRandom.Next(0, 100);
+
+            if (random < 15)
+            {
+                m_rooms[i].SetRoomType(RoomType.Powerup);
+                roomCount++;
+            }
+        }
+
+        if (roomCount == 0)
+        {
+            int random = GameplayManager.s_seedRandom.Next(1, m_rooms.Count - 2);
+            m_rooms[random].SetRoomType(RoomType.Powerup);
+        }
+    }
+
+    void RemoveBossRoomInnerWalls()
+    {
+        int lastIndex = 0;
+
+        for (int i =0; i <m_layouts.Count; i++)
+        {
+            if(!m_layouts[i].m_roomAdded)
+            {
+                break;
+            }
+
+            lastIndex = i;
+        }
+
+        m_layouts[lastIndex].RemoveInnerWalls();
+        TileGrid roomGrid = m_layouts[lastIndex].m_grid;
+
+        for (int x = 0; x < roomGrid.m_width; x++)
+        {
+            GridIndex position = m_layouts[lastIndex].GetPositionIndex();
+
+            for (int y = 0; y < roomGrid.m_height; y++)
+            {
+                GridIndex posOnMap;
+
+                posOnMap.m_x = position.m_x + x;
+                posOnMap.m_y = position.m_y + y;
+
+                m_mapGrid.SetTileType(posOnMap, roomGrid.GetTile(new GridIndex(x, y)).GetTileType());
+            }
         }
     }
 }

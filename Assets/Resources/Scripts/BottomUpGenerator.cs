@@ -10,8 +10,9 @@ public class BottomUpGenerator
         int roomIndex = 0;
         int safeLockCount = 0;
         int numOfRooms = t_roomsToPlace.Count;
+        int maxSafeLock = numOfRooms * 25;
 
-        while (roomIndex < numOfRooms && safeLockCount < 400)
+        while (roomIndex < numOfRooms && safeLockCount < maxSafeLock)
         {
             GridIndex position = new GridIndex(GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_width),
                GameplayManager.s_seedRandom.Next(0, t_mapGrid.m_height));
@@ -39,7 +40,6 @@ public class BottomUpGenerator
                 }
 
                 roomIndex++;
-                yield return null;
             }
             safeLockCount++;
         }

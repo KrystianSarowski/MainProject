@@ -4,23 +4,35 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+[System.Serializable]
 public struct GenerationStats
 {
     public float m_avergeTime;
     public float m_shortestTime;
     public float m_longestTime;
+    public float m_totalTime;
 
     public int m_avergeRoomsPlaced;
     public int m_mostRoomsPlaced;
     public int m_leastRoomsPlaced;
+    public int m_totalRooms;
 }
 
+[System.Serializable]
 public struct GenerationData
 {
     public int m_mapsToGenerate;
     public int m_numOfRooms;
     public int m_levelWidth;
     public int m_levelHeight;
+}
+
+[System.Serializable]
+public class CombinedData
+{
+    public GenerationData m_generationData;
+    public GenerationStats m_topDownStats;
+    public GenerationStats m_borromUpStats;
 }
 
 public class HeatSceneManager : MonoBehaviour
@@ -63,6 +75,10 @@ public class HeatSceneManager : MonoBehaviour
     public List<TMP_Text> m_bottomUpStatsText;
     public List<TMP_Text> m_topDownStatsText;
 
+    bool m_saveNewData = false;
+    bool m_topDownDone = true;
+    bool m_bottomUpDone = true;
+
     void Start()
     {
         m_canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Canvas>();
@@ -99,6 +115,21 @@ public class HeatSceneManager : MonoBehaviour
         {
             GenerateMap();
         }
+
+        if(m_saveNewData)
+        {
+            if(m_bottomUpDone && m_topDownDone)
+            {
+                m_saveNewData = false;
+
+                CombinedData combinedData = new CombinedData();
+                combinedData.m_generationData = m_currentData;
+                combinedData.m_borromUpStats = m_bottomUpStats;
+                combinedData.m_topDownStats = m_topDownStats;
+
+                DataSave.SaveGenerationData(combinedData);
+            }
+        }    
     }
 
     void GenerateMap()
@@ -158,18 +189,26 @@ public class HeatSceneManager : MonoBehaviour
         m_bottomUpStats.m_avergeTime = 0.0f;
         m_bottomUpStats.m_shortestTime = 0.0f;
         m_bottomUpStats.m_longestTime = 0.0f;
+        m_bottomUpStats.m_totalTime = 0.0f;
 
         m_bottomUpStats.m_avergeRoomsPlaced = 0;
         m_bottomUpStats.m_mostRoomsPlaced = 0;
         m_bottomUpStats.m_leastRoomsPlaced = 0;
+        m_bottomUpStats.m_totalRooms = 0;
 
         m_topDownStats.m_avergeTime = 0.0f;
         m_topDownStats.m_shortestTime = 0.0f;
         m_topDownStats.m_longestTime = 0.0f;
+        m_topDownStats.m_totalTime = 0.0f;
 
         m_topDownStats.m_avergeRoomsPlaced = 0;
         m_topDownStats.m_mostRoomsPlaced = 0;
         m_topDownStats.m_leastRoomsPlaced = 0;
+        m_topDownStats.m_totalRooms = 0;
+
+        m_saveNewData = true;
+        m_topDownDone = false;
+        m_bottomUpDone = false;
     }
 
     IEnumerator GenerateHeatMapBottomUp()
@@ -215,6 +254,8 @@ public class HeatSceneManager : MonoBehaviour
 
         Debug.Log(m_bottomUpStats.m_avergeTime);
         Debug.Log(m_bottomUpStats.m_avergeRoomsPlaced);
+
+        m_bottomUpDone = true;
     }
 
     IEnumerator GenerateHeatMapTopDown()
@@ -259,6 +300,8 @@ public class HeatSceneManager : MonoBehaviour
 
         Debug.Log(m_topDownStats.m_avergeTime);
         Debug.Log(m_topDownStats.m_avergeRoomsPlaced);
+
+        m_topDownDone = true;
     }
 
     GenerationStats UpdateTimeStats(float t_mapsGenerated, float t_elapsedTime, GenerationStats t_stats)
@@ -273,7 +316,8 @@ public class HeatSceneManager : MonoBehaviour
             t_stats.m_shortestTime = t_elapsedTime;
         }
 
-        t_stats.m_avergeTime = (t_stats.m_avergeTime * (t_mapsGenerated - 1) + t_elapsedTime) / t_mapsGenerated;
+        t_stats.m_totalTime += t_elapsedTime;
+        t_stats.m_avergeTime = t_stats.m_totalTime / t_mapsGenerated;
 
         return t_stats;
     }
@@ -300,7 +344,8 @@ public class HeatSceneManager : MonoBehaviour
             t_stats.m_leastRoomsPlaced = count;
         }
 
-        t_stats.m_avergeRoomsPlaced = (int)((t_stats.m_avergeRoomsPlaced * (t_mapsGenerated - 1) + count) / t_mapsGenerated);
+        t_stats.m_totalRooms += count;
+        t_stats.m_avergeRoomsPlaced = (int)(t_stats.m_totalRooms / t_mapsGenerated);
 
         return t_stats;
     }

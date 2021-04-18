@@ -106,8 +106,8 @@ MonoBehaviour:
   m_bulletPrefab: {fileID: 3959050539900903423, guid: f415301fabad5c748a8b913e2f583be9,
     type: 3}
   m_bulletSpawn: {fileID: 3806513857364791580}
-  m_reloadDelay: 1
-  m_pelletCount: 8
+  m_reloadDelay: 2
+  m_pelletCount: 12
   m_maxAmmo: 5
   m_isPlayerWeapon: 1
 --- !u!1 &3806513857364791581

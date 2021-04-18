@@ -118,8 +118,8 @@ public class RoomLayout
                         int yOffset = Mathf.CeilToInt((m_grid.m_height / 2) / 2.0f);
                         for (int x = 2; x < m_grid.m_width - 2; x++)
                         {
-                            m_grid.SetTileType(new GridIndex(x, yOffset), TileType.Wall);
-                            m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.Wall);
+                            m_grid.SetTileType(new GridIndex(x, yOffset), TileType.InnerWall);
+                            m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.InnerWall);
                         }
                     }
                     break;
@@ -128,8 +128,8 @@ public class RoomLayout
                         int xOffset = Mathf.CeilToInt((m_grid.m_width / 2) / 2.0f);
                         for (int y = 2; y < m_grid.m_height - 2; y++)
                         {
-                            m_grid.SetTileType(new GridIndex(xOffset, y), TileType.Wall);
-                            m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.Wall);
+                            m_grid.SetTileType(new GridIndex(xOffset, y), TileType.InnerWall);
+                            m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.InnerWall);
                         }
                     }
                     break;
@@ -140,8 +140,8 @@ public class RoomLayout
                         {
                             if (y != m_nodePosIndex.m_y)
                             {
-                                m_grid.SetTileType(new GridIndex(xOffset, y), TileType.Wall);
-                                m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.Wall);
+                                m_grid.SetTileType(new GridIndex(xOffset, y), TileType.InnerWall);
+                                m_grid.SetTileType(new GridIndex(m_grid.m_width - 1 - xOffset, y), TileType.InnerWall);
                             }
                         }
 
@@ -150,8 +150,8 @@ public class RoomLayout
                         {
                             if(x != m_nodePosIndex.m_x)
                             {
-                                m_grid.SetTileType(new GridIndex(x, yOffset), TileType.Wall);
-                                m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.Wall);
+                                m_grid.SetTileType(new GridIndex(x, yOffset), TileType.InnerWall);
+                                m_grid.SetTileType(new GridIndex(x, m_grid.m_height - 1 - yOffset), TileType.InnerWall);
                             }
                         }
                     }
@@ -162,10 +162,10 @@ public class RoomLayout
                         int xOffset = GameplayManager.s_seedRandom.Next(1, (m_grid.m_width - 4) / 2);
                         int yOffset = GameplayManager.s_seedRandom.Next(1, (m_grid.m_height - 4) / 2);
 
-                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y - yOffset), TileType.Wall);
-                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y - yOffset), TileType.Wall);
-                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y + yOffset), TileType.Wall);
-                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y + yOffset), TileType.Wall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y - yOffset), TileType.InnerWall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y - yOffset), TileType.InnerWall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x + xOffset, m_nodePosIndex.m_y + yOffset), TileType.InnerWall);
+                        m_grid.SetTileType(new GridIndex(m_nodePosIndex.m_x - xOffset, m_nodePosIndex.m_y + yOffset), TileType.InnerWall);
                     }
                     break;
                 default:
@@ -208,5 +208,19 @@ public class RoomLayout
         }
 
         return exitsOnMap;
+    }
+
+    public void RemoveInnerWalls()
+    {
+        for (int x = 0; x < m_grid.m_width; x++)
+        {
+            for (int y = 0; y < m_grid.m_height; y++)
+            {
+                if(m_grid.GetTile(new GridIndex(x, y)).GetTileType() == TileType.InnerWall)
+                {
+                    m_grid.SetTileType(new GridIndex(x, y), TileType.Empty);
+                }
+            }
+        }
     }
 }

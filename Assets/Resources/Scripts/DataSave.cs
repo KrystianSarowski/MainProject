@@ -17,4 +17,17 @@ public class DataSave
         System.IO.File.WriteAllText(fullPath, jsonData);
         AssetDatabase.Refresh();
     }
+
+    public static void SaveGenerationData(CombinedData t_generationData)
+    {
+        string timeString = System.DateTime.Now.TimeOfDay.ToString();
+        timeString = timeString.Replace(":", "");
+        timeString = timeString.Replace(".", "");
+
+        string jsonData = JsonUtility.ToJson(t_generationData, true);
+        string fullPath = s_jsonPath + "Generation" + timeString + ".json";
+
+        System.IO.File.WriteAllText(fullPath, jsonData);
+        AssetDatabase.Refresh();
+    }
 }

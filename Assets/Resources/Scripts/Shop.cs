@@ -11,8 +11,8 @@ public class Shop : MonoBehaviour
     int m_activeIndex = 0;
     bool m_isActive = false;
 
-    Vector3 m_itemsStartPos = new Vector3(170, 300, 0);
-    Vector3 m_itemsPosOffset = new Vector3(120, 120, 0);
+    Vector3 m_itemsStartPos = new Vector3(120, 250, 0);
+    Vector3 m_itemsPosOffset = new Vector3(140, 140, 0);
 
     [SerializeField]
     GameObject m_shopItemPrefab;

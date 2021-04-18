@@ -8,7 +8,11 @@ public class MeshGenerator : MonoBehaviour
     public SquareGrid m_squareGrid;
 
     //The mesh filter for the walls.
-    public MeshFilter m_walls;
+    [SerializeField]
+    MeshFilter m_walls;
+
+    [SerializeField]
+    MeshFilter m_outerMesh;
 
     //List of the vartices created from the squares within the square grid.
     List<Vector3> m_vertices;
@@ -26,13 +30,13 @@ public class MeshGenerator : MonoBehaviour
     //A hash set of visited vertices to speed up the creation of the walls.
     HashSet<int> m_checkedVertices = new HashSet<int>();
 
-    public void GenerateMesh(TileGrid t_tileGrid, float t_squareSize, float t_wallHeight)
+    public void GenerateMesh(TileGrid t_tileGrid, float t_squareSize, float t_wallHeight, TileType t_tileType)
     {
         m_triangleDictionary.Clear();
         m_wallOutlines.Clear();
         m_checkedVertices.Clear();
 
-        m_squareGrid = new SquareGrid(t_tileGrid, t_squareSize);
+        m_squareGrid = new SquareGrid(t_tileGrid, t_squareSize, t_tileType);
 
         m_vertices = new List<Vector3>();
         m_triangles = new List<int>();
@@ -46,7 +50,7 @@ public class MeshGenerator : MonoBehaviour
         }
 
         Mesh mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
+        m_outerMesh.mesh = mesh;
 
         mesh.vertices = m_vertices.ToArray();
         mesh.triangles = m_triangles.ToArray();
@@ -58,8 +62,6 @@ public class MeshGenerator : MonoBehaviour
             float percentX = Mathf.InverseLerp(0, t_tileGrid.m_width * t_squareSize, m_vertices[i].x);
             float percentY = Mathf.InverseLerp(0, t_tileGrid.m_height * t_squareSize, m_vertices[i].z);
             uvs[i] = new Vector2(percentX, percentY);
-
-           //x* t_squareSize +t_squareSize / 2, 0, y* t_squareSize +t_squareSize / 2);
         }
         mesh.uv = uvs;
 
@@ -391,7 +393,7 @@ public class MeshGenerator : MonoBehaviour
     {
         public Square[,] m_squares;
 
-        public SquareGrid(TileGrid t_tileGrid, float t_squareSize)
+        public SquareGrid(TileGrid t_tileGrid, float t_squareSize, TileType t_tileType)
         {
             int mapWidth = t_tileGrid.m_width;
             int mapHight = t_tileGrid.m_height;
@@ -403,7 +405,7 @@ public class MeshGenerator : MonoBehaviour
                 for (int y = 0; y < mapHight; y++)
                 {
                     Vector3 position = new Vector3(x * t_squareSize + t_squareSize / 2, 0, y * t_squareSize + t_squareSize / 2);
-                    primaryVertexGrid[x, y] = new PrimaryVertex(position, t_tileGrid.GetTile(new GridIndex(x, y)).GetTileType() == TileType.Wall, t_squareSize);
+                    primaryVertexGrid[x, y] = new PrimaryVertex(position, t_tileGrid.GetTile(new GridIndex(x, y)).GetTileType() == t_tileType, t_squareSize);
 
                 }
             }

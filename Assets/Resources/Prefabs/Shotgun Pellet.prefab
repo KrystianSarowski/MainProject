@@ -95,10 +95,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_speed: 1
-  m_timeToLive: 1.5
+  m_timeToLive: 2
   m_damageFallOffRange: 2
   m_damageAreaRange: 0
-  m_damageFallOff: 1
+  m_damageFallOff: 2
   m_baseMinDamage: 1
   m_baseDamage: 12
   m_isAreaEffect: 0

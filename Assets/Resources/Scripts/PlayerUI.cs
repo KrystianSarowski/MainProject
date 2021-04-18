@@ -14,6 +14,7 @@ public class PlayerUI : MonoBehaviour
 
     TMP_Text m_ammoText;
     TMP_Text m_goldText;
+    TMP_Text m_seedText;
 
     Vector2 m_healthBarMaxSize;
 
@@ -41,6 +42,11 @@ public class PlayerUI : MonoBehaviour
             else if(child.name == "Gold Text")
             {
                 m_goldText = child.GetComponent<TMP_Text>();
+            }
+            else if (child.name == "Seed Text")
+            {
+                m_seedText = child.GetComponent<TMP_Text>();
+                m_seedText.text = "Seed\n" + FindObjectOfType<GameplayManager>().m_seed;
             }
         }
     }

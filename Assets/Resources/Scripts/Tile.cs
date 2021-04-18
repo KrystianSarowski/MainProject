@@ -6,6 +6,7 @@ public enum TileType
 {
     Node,
     Empty,
+    InnerWall,
     Wall,
     Exit
 }

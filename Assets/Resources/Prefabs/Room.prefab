@@ -59,11 +59,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_doorPrefab: {fileID: 8965023245911757771, guid: 7c2642fbe0f6bfe42888653cff9a549d,
     type: 3}
-  m_enemyPrefab: {fileID: 1635886451029394347, guid: 6f24a748ece766f4c9ed43529bf262af,
+  m_enemyPrefab: {fileID: 8649396510544934668, guid: fae856dbd2aee15488004e11be3fe819,
     type: 3}
-  m_bossPrefab: {fileID: 8207134400026370873, guid: d4b55e816788e7f4fba2d15940098114,
+  m_bossPrefab: {fileID: 1438911199416563329, guid: d4b55e816788e7f4fba2d15940098114,
     type: 3}
-  m_shopkeeperPrefab: {fileID: 7580780097185887918, guid: 1a335f355bb674345a3567a26b07f9b5,
+  m_shopkeeperPrefab: {fileID: 3285975762914305099, guid: 1a335f355bb674345a3567a26b07f9b5,
     type: 3}
   m_exitPrefab: {fileID: 6463290110360236839, guid: 3ccd5928e65e1884db3a3c3341b0ba1a,
     type: 3}
@@ -74,5 +74,7 @@ MonoBehaviour:
   m_pickUpPrefabs:
   - {fileID: 1588229349274512182, guid: 2bb4d16c11c34e7429595c2f7c724a44, type: 3}
   - {fileID: 844585526067584695, guid: b1b1a71ba156eb144b9d42121dcc5378, type: 3}
+  - {fileID: 6117371215923438421, guid: 6f45b3959c113b04485fc0743057e3f6, type: 3}
+  - {fileID: 3982072693093076858, guid: d9cf9eab30103f747b17c4b43d4530eb, type: 3}
   m_wallPrefab: {fileID: 8551201213174193663, guid: b9f4561374ea83e40987901a9f11f133,
     type: 3}
