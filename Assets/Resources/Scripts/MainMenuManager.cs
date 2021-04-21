@@ -17,7 +17,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if(m_inputingCustomSeed)
         {
-            UpdateCusomSeed();
+            UpdateCustomSeed();
         }
     }
 
@@ -31,7 +31,7 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    public void UpdateCusomSeed()
+    public void UpdateCustomSeed()
     {
         if (Input.GetKeyDown(KeyCode.Backspace))
         {
@@ -59,15 +59,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void ChangeScene(string t_sceneName)
     {
-        if(m_inputingCustomSeed)
-        {
-            FindObjectOfType<GameplayManager>().UseCustomSeed(m_seedString);
-        }
-        else
-        {
-            FindObjectOfType<GameplayManager>().UseRandomSeed();
-        }
-
         GameplayManager.LoadScene(t_sceneName);
     }
 
@@ -83,6 +74,15 @@ public class MainMenuManager : MonoBehaviour
 
     public void LoadFirstLevel()
     {
+        if (m_inputingCustomSeed)
+        {
+            FindObjectOfType<GameplayManager>().UseCustomSeed(m_seedString);
+        }
+        else
+        {
+            FindObjectOfType<GameplayManager>().UseRandomSeed();
+        }
+
         FindObjectOfType<GameplayManager>().LoadFirstLevel();
     }
 }

@@ -1,0 +1,28 @@
+{
+    "m_generationData": {
+        "m_mapsToGenerate": 100,
+        "m_numOfRooms": 40,
+        "m_levelWidth": 100,
+        "m_levelHeight": 100
+    },
+    "m_topDownStats": {
+        "m_avergeTime": 0.16275624930858613,
+        "m_shortestTime": 0.03412419930100441,
+        "m_longestTime": 0.1876939982175827,
+        "m_totalTime": 16.275625228881837,
+        "m_avergeRoomsPlaced": 32,
+        "m_mostRoomsPlaced": 40,
+        "m_leastRoomsPlaced": 21,
+        "m_totalRooms": 3279
+    },
+    "m_bottomUpStats": {
+        "m_avergeTime": 0.197227343916893,
+        "m_shortestTime": 0.0457506999373436,
+        "m_longestTime": 0.30793020129203799,
+        "m_totalTime": 19.722734451293947,
+        "m_avergeRoomsPlaced": 36,
+        "m_mostRoomsPlaced": 40,
+        "m_leastRoomsPlaced": 30,
+        "m_totalRooms": 3695
+    }
+}

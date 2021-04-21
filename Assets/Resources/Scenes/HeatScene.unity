@@ -1876,7 +1876,7 @@ PrefabInstance:
     - target: {fileID: 4967812692315743380, guid: c7b4cb2e95704424a97b72237a7f9458,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 100
+      value: 21143
       objectReference: {fileID: 0}
     - target: {fileID: 4967812692315743380, guid: c7b4cb2e95704424a97b72237a7f9458,
         type: 3}
@@ -2736,7 +2736,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 80
+  m_text: 100
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3032,7 +3032,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 662262859}
   m_Direction: 0
   m_MinValue: 20
-  m_MaxValue: 80
+  m_MaxValue: 100
   m_WholeNumbers: 1
   m_Value: 20
   m_OnValueChanged:
@@ -3371,7 +3371,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 25
+  m_text: 40
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4007,7 +4007,7 @@ MonoBehaviour:
   m_Direction: 0
   m_MinValue: 1
   m_MaxValue: 100
-  m_WholeNumbers: 0
+  m_WholeNumbers: 1
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4183,8 +4183,8 @@ MonoBehaviour:
   m_HandleRect: {fileID: 252821585}
   m_Direction: 0
   m_MinValue: 1
-  m_MaxValue: 25
-  m_WholeNumbers: 0
+  m_MaxValue: 40
+  m_WholeNumbers: 1
   m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4455,7 +4455,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}

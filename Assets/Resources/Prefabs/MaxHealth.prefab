@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6117371215923438418}
   m_Layer: 0
   m_Name: MaxHealth
-  m_TagString: Untagged
+  m_TagString: Pickup
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -103,7 +103,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6117371215923438421}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.0020878706, y: 0.018911004, z: 0.018015208}
