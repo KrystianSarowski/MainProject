@@ -5,10 +5,10 @@ using System.Linq;
 
 public class GridArea
 {
-    public static int s_padding = 1;
+    public static int s_padding = 1;    //Padding required on either side of the room for future corridor.
 
-    public int m_width, m_height;
-    public int m_childCountLeft, m_childCountRight;
+    public int m_width, m_height;       
+    public int m_childCountLeft, m_childCountRight; //Number of childrean GridAreas on either side of this node.
    
     public GridIndex m_startPos;
 
@@ -198,6 +198,11 @@ public class GridArea
         return false;
     }
 
+    /// <summary>
+    /// Updates the current child count on the right and left of the node by 
+    /// retriving the value sum from the direct chil node.
+    /// If this node has a parent it calls it to update its child count.
+    /// </summary>
     void UpdateChildCount()
     {
         m_childCountLeft = m_children[0].m_childCountLeft + m_children[0].m_childCountRight + 1;
@@ -212,6 +217,15 @@ public class GridArea
 
 public class TopDownGenerator : MonoBehaviour
 {
+    /// <summary>
+    /// Starts the chain of calls for PlaceRoomLayout starting with the passed in root node
+    /// for each of the passed in RoomLayouts. Once all RoomLayouts have been attempt to be placed
+    /// with the TileGrid, TransferRoomLayouts is called to actually place thenm within the TileGird.
+    /// </summary>
+    /// <param name="t_root">The root GridArea from which each of the calls will start from</param>
+    /// <param name="t_mapGrid">The TileGrid in which the RoomLayouts are to be placed in</param>
+    /// <param name="t_roomsToPlace">List of RoomLayouts to be placed</param>
+    /// <returns></returns>
     public static IEnumerator PlaceRooms(GridArea t_root, TileGrid t_mapGrid, List<RoomLayout> t_roomsToPlace)
     {
         t_root.m_startPos = new GridIndex(0, 0);
@@ -219,21 +233,15 @@ public class TopDownGenerator : MonoBehaviour
         t_root.m_height = t_mapGrid.m_height;
 
         int index = 0;
-        bool noMoreSpace = false;
 
-        while(index < t_roomsToPlace.Count && !noMoreSpace)
+        while(index < t_roomsToPlace.Count)
         {
-            if(!PlaceRoomLayouts(t_root, t_roomsToPlace[index]))
-            {
-                noMoreSpace = true;
-            }
-
-            else
+            if(PlaceRoomLayout(t_root, t_roomsToPlace[index]))
             {
                 t_roomsToPlace[index].SetID(index);
                 t_roomsToPlace[index].m_roomAdded = true;
-                index++;
             }
+            index++;
         }
 
         TransferRoomLayouts(t_root, t_mapGrid);
@@ -241,7 +249,16 @@ public class TopDownGenerator : MonoBehaviour
         yield return null;
     }
 
-    static bool PlaceRoomLayouts(GridArea t_current, RoomLayout t_room)
+    /// <summary>
+    /// Calls itself recursivly to attempt to place a RoomLayout within the current
+    /// GridArea if its empty or has no childrean but there is enough space for the current RoomLayout
+    /// and the new RoomLayout otheriwse it will attempt to call this function on both of its childrean
+    /// that with the one that has less childrean until it succeds or has tried all the child nodes.
+    /// </summary>
+    /// <param name="t_current">The current GridAre in which we are trying to place the RoomLayout</param>
+    /// <param name="t_room">The RoomLayout to be placed</param>
+    /// <returns>Bool for if the process has been succesful</returns>
+    static bool PlaceRoomLayout(GridArea t_current, RoomLayout t_room)
     {
         if(t_current.AddRoom(t_room))
         {
@@ -254,12 +271,12 @@ public class TopDownGenerator : MonoBehaviour
             {
                 if (t_current.m_childCountLeft <= t_current.m_childCountRight)
                 {
-                    if (PlaceRoomLayouts(t_current.m_children[0], t_room))
+                    if (PlaceRoomLayout(t_current.m_children[0], t_room))
                     {
                         return true;
                     }
 
-                    else if(PlaceRoomLayouts(t_current.m_children[1], t_room))
+                    else if(PlaceRoomLayout(t_current.m_children[1], t_room))
                     {
                         return true;
                     }
@@ -267,12 +284,12 @@ public class TopDownGenerator : MonoBehaviour
 
                 else
                 {
-                    if (PlaceRoomLayouts(t_current.m_children[1], t_room))
+                    if (PlaceRoomLayout(t_current.m_children[1], t_room))
                     {
                         return true;
                     }
 
-                    else if (PlaceRoomLayouts(t_current.m_children[0], t_room))
+                    else if (PlaceRoomLayout(t_current.m_children[0], t_room))
                     {
                         return true;
                     }
@@ -291,6 +308,12 @@ public class TopDownGenerator : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Calls itself recursivly in order to transfer all the RoomLayouts 
+    /// placed within the GirdArea binary tree onto the passed in TileGrid.
+    /// </summary>
+    /// <param name="t_current">The current GridArea being checked</param>
+    /// <param name="t_mapGrid">The TileGrid in which the RoomLayouts will be transfered to</param>
     static void TransferRoomLayouts(GridArea t_current, TileGrid t_mapGrid)
     {
         if (t_current.m_layout != null)
@@ -325,6 +348,14 @@ public class TopDownGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Calls itself recursivly in order to create a TileArc between each of the RoomLayouts
+    /// within the GridArea binary tree by connecting each RoomLayout on the left and right of
+    /// the tree using the closest room combination until the we return to the root GridArea.
+    /// </summary>
+    /// <param name="t_current"></param>
+    /// <param name="t_nodeArcs"></param>
+    /// <returns>Combined list of RoomLayouts from the right and left of the tree</returns>
     public static List<RoomLayout> ConnectRooms(GridArea t_current, List<TileArc> t_nodeArcs)
     {
         List<RoomLayout> rooms = new List<RoomLayout>();
@@ -362,6 +393,15 @@ public class TopDownGenerator : MonoBehaviour
         return rooms;
     }
 
+    /// <summary>
+    /// Moves the passed in list TileArcs from the center node of the RoomLayout to
+    /// potential exit tiles by selecting the closes exit Tiles from start and end RoomLayout
+    /// in each arc. The Result is stored in the passed in list t_exitArcs.
+    /// </summary>
+    /// <param name="t_roomArcs">List of TileArcs from the center of each room</param>
+    /// <param name="t_exitArcs">Resulting list of TileArcs that have been move to exit Tiles</param>
+    /// <param name="t_mapGrid">The TileGrid in which this process occures</param>
+    /// <param name="t_rooms">The RoomLayout which contain the TileArcs</param>
     public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         List<GridIndex> possibleExits1;
@@ -402,6 +442,13 @@ public class TopDownGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates corridors between each of the rooms using the passed in TileArcs.
+    /// The corridor path is created using Astar. The Tiles along the path are set
+    /// to empty.
+    /// </summary>
+    /// <param name="t_exitArcs">List of TileArcs used to create corridors between rooms</param>
+    /// <param name="t_mapGrid">TileGrid in which this process occures</param>
     public static void CreateCorridors(List<TileArc> t_exitArcs, TileGrid t_mapGrid)
     {
         bool[,] visitedGrid = new bool[t_mapGrid.m_width, t_mapGrid.m_height];

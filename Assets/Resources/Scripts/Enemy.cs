@@ -307,6 +307,12 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempts to avoid the obstacles directly infornt of the Enemy
+    /// by selecting the side with least amount of obstacles.
+    /// If both of the side are fully blocked the enemy will try to rotate
+    /// around to the right for 6 updates and try again.
+    /// </summary>
     void AvoidFront()
     {
         if(!m_turnAround)
@@ -362,6 +368,11 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Avoids the obstacles that are to the side of Enemy by choosing the direction
+    /// for which the obstacles are the furthest away or has the least amount of obstacles.
+    /// The resulting direction angle is then capped to avoid it rotating to much to the other side.
+    /// </summary>
     void AvoidSides()
     {
         Vector3 dirVector = transform.forward;
@@ -448,6 +459,11 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Deals melee damage to the player each time the cooldown reaches 0.
+    /// If the certain conditions of this state are met the Enemy will then proceced
+    /// to change state. Slight offset is required for the melee range due to the truncation
+    /// of player height. When the state is changed the fire ParticleSystem is stopped.
     void MeleeAttack()
     {
         m_attackCooldown -= Time.fixedDeltaTime;
@@ -482,6 +498,12 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fire a projectal at the player when it is able to.
+    /// If the certain conditions of this state are met the Enemy will then proceced
+    /// to change state. Slight offset is required for the melee range due to the truncation
+    /// of player height.
+    /// </summary>
     void RangeAttack()
     {
         m_attackCooldown -= Time.fixedDeltaTime;

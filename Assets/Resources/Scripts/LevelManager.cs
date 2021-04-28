@@ -29,8 +29,14 @@ public class LevelManager : MonoBehaviour
     [Range(1.0f, 4.0f)]
     public float m_innerWallHeight;
 
-    public Material m_floorMaterial;
-    public Material m_ceilingMaterial;
+    [SerializeField]
+    Material m_floorMaterial;
+
+    [SerializeField]
+    Material m_ceilingMaterial;
+
+    [SerializeField]
+    Material m_lowerCeilingMaterial;
 
     [SerializeField]
     MeshGenerator m_wallsGenerator;
@@ -66,6 +72,8 @@ public class LevelManager : MonoBehaviour
                     break;
             }
         }
+
+        m_lowerCeilingMaterial.mainTextureScale = new Vector2(m_levelWidth, m_levelHight);
     }
 
     IEnumerator CreateLevelTopDown()
@@ -79,17 +87,7 @@ public class LevelManager : MonoBehaviour
         TopDownGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         TopDownGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
-        RemoveBossRoomInnerWalls();
-
-        m_wallsGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight, TileType.Wall);
-        m_innerWallGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_innerWallHeight, TileType.InnerWall);
-
-        CreateCeilingAndFloor();
-        BuildRooms();
-        SpawnPlayer();
-        SpawnExit();
-        SetShopKeepers();
-        SetPowerUpRooms();
+        InitializeLevelData();
 
         yield return null;
     }
@@ -105,6 +103,13 @@ public class LevelManager : MonoBehaviour
         BottomUpGenerator.CreateExitArcs(m_shortestRoomArcs, m_exitArcs, m_mapGrid, m_layouts);
         BottomUpGenerator.CreateCorridors(m_exitArcs, m_mapGrid);
 
+        InitializeLevelData();
+
+        yield return null;
+    }
+
+    void InitializeLevelData()
+    {
         RemoveBossRoomInnerWalls();
 
         m_wallsGenerator.GenerateMesh(m_mapGrid, m_tileSize, m_wallHeight, TileType.Wall);
@@ -116,8 +121,7 @@ public class LevelManager : MonoBehaviour
         SpawnExit();
         SetShopKeepers();
         SetPowerUpRooms();
-
-        yield return null;
+        ClearRoomLayoutArcs();
     }
 
     void CreateCeilingAndFloor()
@@ -218,7 +222,7 @@ public class LevelManager : MonoBehaviour
     {
         int lastIndex = 0;
 
-        for (int i =0; i <m_layouts.Count; i++)
+        for (int i =0; i < m_layouts.Count; i++)
         {
             if(!m_layouts[i].m_roomAdded)
             {
@@ -244,6 +248,14 @@ public class LevelManager : MonoBehaviour
 
                 m_mapGrid.SetTileType(posOnMap, roomGrid.GetTile(new GridIndex(x, y)).GetTileType());
             }
+        }
+    }
+
+    void ClearRoomLayoutArcs()
+    {
+        foreach (RoomLayout layout in m_layouts)
+        {
+            layout.RemoveNodeArcs();
         }
     }
 }

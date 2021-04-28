@@ -223,4 +223,9 @@ public class RoomLayout
             }
         }
     }
+
+    public void RemoveNodeArcs()
+    {
+        m_nodeArcs.Clear();
+    }
 }

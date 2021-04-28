@@ -5,6 +5,15 @@ using System.Linq;
 
 public class BottomUpGenerator
 {
+    /// <summary>
+    /// Places the passed in RoomLayouts on the passed in TileGrid by transfering
+    /// the Tiles from the local TileGird of RoomLayout to the correct location the map TileGird.
+    /// When a RoomLayout is placed down succesfully it is marked as placed.
+    /// The while loop runs until all Roomlayouts have been placed or we tried sufficent enough times.
+    /// </summary>
+    /// <param name="t_mapGrid">TileGrid on which each of the RoomLayouts are going to be placed in</param>
+    /// <param name="t_roomsToPlace">List of RoomLayouts to be placed down in passed in TileGird</param>
+    /// <returns></returns>
     public static IEnumerator PlaceRooms(TileGrid t_mapGrid, List<RoomLayout> t_roomsToPlace)
     {
         int roomIndex = 0;
@@ -47,6 +56,15 @@ public class BottomUpGenerator
         yield return null;
     }
 
+    /// <summary>
+    /// Checks if all the tiles starting from the passed in index location for the passed in width
+    /// do not have an owner and are indeside the bounds of the passed in TileGird.
+    /// </summary>
+    /// <param name="t_index">The start index location within the TileGird</param>
+    /// <param name="t_roomWidth">Width of the search within the TileGrid</param>
+    /// <param name="t_roomHeight">Height of the search within the TileGrid</param>
+    /// <param name="t_mapGrid">The TileGrid in which the check occures</param>
+    /// <returns>Bool for if the RoomLayout can be placed in this location</returns>
     public static bool ValidatePlacement(GridIndex t_index, int t_roomWidth, int t_roomHeight, TileGrid t_mapGrid)
     {
         bool canBePlaced = true;
@@ -74,6 +92,14 @@ public class BottomUpGenerator
         return canBePlaced;
     }
 
+    /// <summary>
+    /// Creates the TileArcs between each of the RoomLayouts placed within the TileGrid
+    /// traveling through th TileGrid horizonatlly then vertically and connecting RoomLayouts
+    /// thogetheer by checking if there are no rooms between the individual Tile within each of
+    /// the rooms in a straigh line.
+    /// </summary>
+    /// <param name="t_mapGrid">The TileGrid that contains all the RoomLayouts</param>
+    /// <param name="t_rooms">List of RoomLayout to which each of the TileArcs will be added to</param>
     public static void CreateRoomArcs(TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         int curRoomID;
@@ -128,6 +154,69 @@ public class BottomUpGenerator
         }
     }
 
+    /// <summary>
+    /// Creates a Minimum Spanning Tree of TileArcs using the TileArcs from the passed
+    /// in RoomLayouts. Each of the RoomLayout becomes connected to atleast to one other
+    /// RoomLayout. The Resulting list of TileArcs is then returned.
+    /// </summary>
+    /// <param name="t_rooms">RoomLayouts contain the TileArcs to use for the MST</param>
+    /// <returns>The resulting MST of TileArcs as a list</returns>
+    public static List<TileArc> CreateMST(List<RoomLayout> t_rooms)
+    {
+        foreach (RoomLayout room in t_rooms)
+        {
+            room.SetIsVisited(false);
+        }
+
+        List<TileArc> arclist = new List<TileArc>();
+        List<TileArc> treeArcs = new List<TileArc>();
+
+        foreach (TileArc arc in t_rooms[0].m_nodeArcs)
+        {
+            arclist.Add(arc);
+        }
+
+        arclist = arclist.OrderBy(o => o.GetWeigtht()).ToList();
+
+        t_rooms[0].SetIsVisited(true);
+
+        TileArc curArc;
+
+        while (arclist.Count() != 0)
+        {
+            curArc = arclist[0];
+
+            if (curArc.GetTargetRoom().GetIsVisited() != true)
+            {
+                treeArcs.Add(curArc);
+                curArc.GetTargetRoom().SetIsVisited(true);
+
+                foreach (TileArc arc in curArc.GetTargetRoom().m_nodeArcs)
+                {
+                    arclist.Add(arc);
+                }
+
+                arclist = arclist.OrderBy(o => o.GetWeigtht()).ToList();
+            }
+
+            else
+            {
+                arclist.Remove(curArc);
+            }
+        }
+
+        return treeArcs;
+    }
+
+    /// <summary>
+    /// Moves the passed in list TileArcs from the center node of the RoomLayout to
+    /// potential exit tiles by selecting the closes exit Tiles from start and end RoomLayout
+    /// in each arc. The Result is stored in the passed in list t_exitArcs.
+    /// </summary>
+    /// <param name="t_roomArcs">List of TileArcs from the center of each room</param>
+    /// <param name="t_exitArcs">Resulting list of TileArcs that have been move to exit Tiles</param>
+    /// <param name="t_mapGrid">The TileGrid in which this process occures</param>
+    /// <param name="t_rooms">The RoomLayout which contain the TileArcs</param>
     public static void CreateExitArcs(List<TileArc> t_roomArcs, List<TileArc> t_exitArcs, TileGrid t_mapGrid, List<RoomLayout> t_rooms)
     {
         List<GridIndex> possibleExits1;
@@ -168,6 +257,13 @@ public class BottomUpGenerator
         }
     }
 
+    /// <summary>
+    /// Creates corridors between each of the rooms using the passed in TileArcs.
+    /// The corridor path is created using Astar. The Tiles along the path are set
+    /// to empty.
+    /// </summary>
+    /// <param name="t_exitArcs">List of TileArcs used to create corridors between rooms</param>
+    /// <param name="t_mapGrid">TileGrid in which this process occures</param>
     public static void CreateCorridors(List<TileArc> t_exitArcs, TileGrid t_mapGrid)
     {
         bool[,] visitedGrid = new bool[t_mapGrid.m_width, t_mapGrid.m_height];
@@ -242,52 +338,5 @@ public class BottomUpGenerator
                 }
             }
         }
-    }
-
-    public static List<TileArc> CreateMST(List<RoomLayout> t_rooms)
-    {
-        foreach (RoomLayout room in t_rooms)
-        {
-            room.SetIsVisited(false);
-        }
-
-        List<TileArc> arclist = new List<TileArc>();
-        List<TileArc> treeArcs = new List<TileArc>();
-
-        foreach (TileArc arc in t_rooms[0].m_nodeArcs)
-        {
-            arclist.Add(arc);
-        }
-
-        arclist = arclist.OrderBy(o => o.GetWeigtht()).ToList();
-
-        t_rooms[0].SetIsVisited(true);
-
-        TileArc curArc;
-
-        while (arclist.Count() != 0)
-        {
-            curArc = arclist[0];
-
-            if (curArc.GetTargetRoom().GetIsVisited() != true)
-            {
-                treeArcs.Add(curArc);
-                curArc.GetTargetRoom().SetIsVisited(true);
-
-                foreach (TileArc arc in curArc.GetTargetRoom().m_nodeArcs)
-                {
-                    arclist.Add(arc);
-                }
-
-                arclist = arclist.OrderBy(o => o.GetWeigtht()).ToList();
-            }
-
-            else
-            {
-                arclist.Remove(curArc);
-            }
-        }
-
-        return treeArcs;
     }
 }

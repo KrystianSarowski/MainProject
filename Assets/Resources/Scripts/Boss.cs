@@ -12,11 +12,11 @@ public enum BossStateType
 
 public class Boss : MonoBehaviour
 {
-    const float s_COLLISION_VISION_RANGE = 2.0f;
+    const float s_COLLISION_VISION_RANGE = 2.0f;        //The max distance to the collion for the raycast used to check for walls.
 
     [SerializeField]
     int m_currentHealth = 500;
-    int m_stateIndex = 0;
+    int m_stateIndex = 0;                               //Index used to change the states of the Boss. Assumes boss states are in same order as enum.
 
     float m_maxWalkVelocity = 1.5f;
     float m_maxChargeVelocity = 7.0f;
@@ -25,17 +25,15 @@ public class Boss : MonoBehaviour
     bool m_wasPlayerHit = true;
     bool m_hasCollidedWithWall = false;
 
-    int m_attackDamage = 10;
-    int m_chargeDamage = 30;
+    int m_attackDamage = 10;                            //Damage dealt by the melee attack.
+    int m_chargeDamage = 30;                            //Damage dealt by the charge attack.
 
     Transform m_playerTransform;
 
     [SerializeField]
     Transform m_projectalSpawn;
 
-    List<BossState> m_bossStates = new List<BossState>();
-
-    Room m_room;
+    List<BossState> m_bossStates = new List<BossState>(); //List of all the instace of diffrent boss states. Need to be added in same order as enum.
 
     Rigidbody m_rb;
 
@@ -47,7 +45,6 @@ public class Boss : MonoBehaviour
 
     public void Initialize(Room t_room, Transform t_playerTransform)
     {
-        m_room = t_room;
         m_playerTransform = t_playerTransform;
 
         m_bossStates.Add(new BossDefenceState());
@@ -84,6 +81,11 @@ public class Boss : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Limits the horizonal velocity of the body while maintaining 
+    /// the vetical velocity. The state index is to allow the Boss
+    /// to move fater during charge attack.
+    /// </summary>
     void LimitVelocity()
     {
         Vector3 velocity = m_rb.velocity;
@@ -110,6 +112,11 @@ public class Boss : MonoBehaviour
         m_rb.velocity = velocity;
     }
 
+    /// <summary>
+    /// Check if there is a wall collider in the direction of the passed vector.
+    /// </summary>
+    /// <param name="t_dir">The direction in which to check</param>
+    /// <returns>The bool for if there is a wall in that direction</returns>
     public bool IsThereWall(Vector3 t_dir)
     {
         Ray ray = new Ray(transform.position, t_dir);
@@ -215,6 +222,9 @@ public class Boss : MonoBehaviour
     }
 }
 
+/// <summary>
+/// Base Boss state with the functions that are used by the derived state classes.
+/// </summary>
 public class BossState
 {
     protected float m_timePassed;

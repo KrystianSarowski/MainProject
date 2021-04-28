@@ -77,9 +77,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0b366763eb8e29429a665551cd435af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_speed: 35
-  m_baseMaxSpeed: 3
-  m_jumpVelocity: 4
+  m_speed: 20
+  m_baseMaxSpeed: 2
+  m_jumpVelocity: 3.5
   m_weaponName: Shotgun
 --- !u!114 &222663371052367685
 MonoBehaviour:

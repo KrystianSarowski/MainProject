@@ -25,12 +25,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     float m_jumpVelocity = 3.5f;
 
-    [SerializeField]
-    string m_weaponName;
-
     float m_interactRange = 1.0f;
     float m_maxSpeed = 5.0f;
-    float m_maxSpeedIncrease = 0.2f;
+    float m_maxSpeedIncrease = 1.0f;
 
     bool m_isFalling;
 
@@ -53,11 +50,13 @@ public class PlayerController : MonoBehaviour
 
         m_playerUI.Initialize();
 
-        m_weaponName = PlayerStats.GetWeaponName();
-
         InitializeCamera();
     }
 
+    /// <summary>
+    /// Setups the Main Camera within the scene so that it is able to follow
+    /// the player around. It then calls the initalize weapon to move with camera.
+    /// </summary>
     void InitializeCamera()
     {
         GameObject camera = FindObjectOfType<CameraController>().gameObject;
@@ -69,6 +68,12 @@ public class PlayerController : MonoBehaviour
         InitializeWeapon(camera);
     }
 
+    /// <summary>
+    /// Loads up the weapon based on the name of the currently held weapon by the
+    /// Player, it then attaches to the camera and calls apply upgrades in order to reapply
+    /// any active weapon upgrades.
+    /// </summary>
+    /// <param name="t_camera"></param>
     void InitializeWeapon(GameObject t_camera)
     {
         if(m_weapon != null)
@@ -76,7 +81,7 @@ public class PlayerController : MonoBehaviour
             Destroy(m_weapon.gameObject);
         }
 
-        GameObject weaponPrefab = Resources.Load<GameObject>("Prefabs/" + m_weaponName);
+        GameObject weaponPrefab = Resources.Load<GameObject>("Prefabs/" + PlayerStats.GetWeaponName());
 
         GameObject weaponObject = Instantiate(weaponPrefab, transform.position + weaponPrefab.GetComponent<Weapon>().m_spawnOffset, weaponPrefab.transform.rotation);
 
@@ -92,7 +97,6 @@ public class PlayerController : MonoBehaviour
         ApplyUpgrades();
     }
 
-    //Update is called once per frame
     void Update()
     {
         if(GameplayManager.s_isPaused)
@@ -122,6 +126,11 @@ public class PlayerController : MonoBehaviour
         m_playerUI.UpdateHealthBar(PlayerStats.s_health);
     }
 
+    /// <summary>
+    /// Creates a ray at the centre of the screen and fires it forward.
+    /// If the object with which the ray collides is within the interaction distance
+    /// and it is interactable an approperate reaction will be taken.
+    /// </summary>
     void Interact()
     { 
         if(Input.GetKeyDown(KeyCode.E))
@@ -189,6 +198,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies the pickup to the Player.
+    /// If the pickup is a health up then the Player is healed.
+    /// If the pickup is an upgrade that upgrades level is increased and
+    /// all the upgrades are reapplied and save to file.
+    /// </summary>
+    /// <param name="t_name">The name of the pickup that the Player has collected</param>
     void ApplyPickup(string t_name)
     {
         switch (t_name)
@@ -205,9 +221,11 @@ public class PlayerController : MonoBehaviour
                 ApplyUpgrades();
                 break;
             case "MovementSpeed":
+                m_upgradeLevels.m_maxSpeedLevel++;
                 ApplyUpgrades();
                 break;
             case "MaxHealth":
+                m_upgradeLevels.m_maxSpeedLevel++;
                 ApplyUpgrades();
                 break;
             default:
@@ -215,6 +233,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reapplies all the upgrades to the PlayerStats and other variables and saves it
+    /// to file so that when the Player progresses to next level the upgrades are reapplied.
+    /// </summary>
     void ApplyUpgrades()
     {
         m_weapon.IncreaseDamageMultiplier(m_upgradeLevels.m_damageMultiplierLevel);
@@ -266,15 +288,8 @@ public class PlayerController : MonoBehaviour
                 break;
             case ShopItemType.Weapon:
                 PlayerStats.SetWeaponName(t_itemName);
-                m_weaponName = t_itemName;
                 InitializeCamera();
                 break;
         }
     }
-
-    public string GetWeaponName()
-    {
-        return m_weaponName;
-    }
-
 }

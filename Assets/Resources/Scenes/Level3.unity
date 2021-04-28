@@ -195,6 +195,8 @@ MonoBehaviour:
   m_innerWallHeight: 1
   m_floorMaterial: {fileID: 2100000, guid: 8d530ffe6c4968843806085897955b9d, type: 2}
   m_ceilingMaterial: {fileID: 2100000, guid: 91e5cef9301799b4d998e36dfd2ac836, type: 2}
+  m_lowerCeilingMaterial: {fileID: 2100000, guid: be42bc021ccb9f942a01732a332b18db,
+    type: 2}
   m_wallsGenerator: {fileID: 539175391}
   m_innerWallGenerator: {fileID: 539175390}
 --- !u!4 &539175393
@@ -417,7 +419,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 91e5cef9301799b4d998e36dfd2ac836, type: 2}
+  - {fileID: 2100000, guid: be42bc021ccb9f942a01732a332b18db, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -686,7 +688,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d728261273670d740a0c0f54da4c5147, type: 2}
+  - {fileID: 2100000, guid: 86db5db3419a8d84ca4427b77a7014e7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

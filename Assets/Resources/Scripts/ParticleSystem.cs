@@ -27,14 +27,12 @@ public struct CubeEmission
     public Vector3 m_scale;
 }
 
-
 [System.Serializable]
 public struct SphereEmission
 {
     public float m_maxRadius;
     public float m_minRadius;
 }
-
 
 public class ParticleSystem : MonoBehaviour
 {

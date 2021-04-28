@@ -77,21 +77,16 @@ public class Shopkeeper : MonoBehaviour
             shopItem.m_isAvailable = true;
         }
 
-        PlayerController player = FindObjectOfType<PlayerController>();
-
-        if(player != null)
+        foreach (ShopItem shopItem in m_shopItems)
         {
-            foreach (ShopItem shopItem in m_shopItems)
+            if (shopItem.m_itemType == ShopItemType.Weapon)
             {
-                if(shopItem.m_itemType == ShopItemType.Weapon)
+                if (!shopItem.m_isBought)
                 {
-                    if(!shopItem.m_isBought)
+                    if (shopItem.m_itemName == PlayerStats.GetWeaponName())
                     {
-                        if (shopItem.m_itemName == player.GetWeaponName())
-                        {
-                            shopItem.m_isAvailable = false;
-                            break;
-                        }
+                        shopItem.m_isAvailable = false;
+                        break;
                     }
                 }
             }
