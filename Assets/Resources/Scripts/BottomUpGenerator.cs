@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+//@Author Krystian Sarowski
 
 public class BottomUpGenerator
 {
