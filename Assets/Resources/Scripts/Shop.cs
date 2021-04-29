@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+//@Author Krystian Sarowski
 
 public class Shop : MonoBehaviour
 {

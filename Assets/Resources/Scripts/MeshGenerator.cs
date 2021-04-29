@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//@Author Krystian Sarowski
 public class MeshGenerator : MonoBehaviour
 {
     //The map grid recreated as a 2D array of squares.

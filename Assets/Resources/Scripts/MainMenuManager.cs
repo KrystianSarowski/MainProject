@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
+//@Author Krystian Sarowski
 
 public class MainMenuManager : MonoBehaviour
 {

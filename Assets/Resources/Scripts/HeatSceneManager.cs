@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+//@Author Krystian Sarowski
 
 [System.Serializable]
 public struct GenerationStats

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//@Author Krystian Sarowski
 public class RoomLayout
 {
     public TileGrid m_grid;

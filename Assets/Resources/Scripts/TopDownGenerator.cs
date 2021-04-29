@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-
+//@Author Krystian Sarowski
 public class GridArea
 {
     public static int s_padding = 1;    //Padding required on either side of the room for future corridor.

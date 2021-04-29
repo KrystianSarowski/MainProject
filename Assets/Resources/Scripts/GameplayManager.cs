@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+//@Author Krystian Sarowski
 
 public enum GenerationType
 {
