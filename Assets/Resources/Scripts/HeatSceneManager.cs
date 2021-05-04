@@ -78,6 +78,15 @@ public class HeatSceneManager : MonoBehaviour
     public List<TMP_Text> m_bottomUpStatsText;
     public List<TMP_Text> m_topDownStatsText;
 
+    [SerializeField]
+    TMP_Text m_curMapSizeText;
+
+    [SerializeField]
+    TMP_Text m_curMapsToGenerateText;
+
+    [SerializeField]
+    TMP_Text m_curRoomsToGenerateText;
+
     bool m_saveNewData = false;
     bool m_testDone = true;
     bool m_runTopDown = false;
@@ -445,15 +454,21 @@ public class HeatSceneManager : MonoBehaviour
     {
         m_nextData.m_levelWidth = (int)m_mapSizeSlider.value;
         m_nextData.m_levelHeight = (int)m_mapSizeSlider.value;
+
+        m_curMapSizeText.text = m_nextData.m_levelWidth.ToString();
     }
 
     public void ChangeMapsToGenerate()
     {
         m_nextData.m_mapsToGenerate = (int)m_mapsToGenerateSlider.value;
+
+        m_curMapsToGenerateText.text = m_nextData.m_mapsToGenerate.ToString();
     }
 
     public void ChangeRoomsToGenerate()
     {
         m_nextData.m_numOfRooms = (int)m_roomsToGenerateSlider.value;
+
+        m_curRoomsToGenerateText.text = m_nextData.m_numOfRooms.ToString();
     }
 }

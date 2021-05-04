@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour
     float m_maxSpeedIncrease = 1.0f;
 
     bool m_isFalling;
+    bool m_haxMode = false;                 //Bool for if the play can be killed or not used for testing.
 
     //The rigid body of the player.
     Rigidbody m_rb;
@@ -105,18 +106,24 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (PlayerStats.s_health <= 0 && !m_haxMode)
+        {
+            GameplayManager.LoadScene("GameoverScene");
+        }
+
         Move();
         Jump();
         Interact();
+        CheckForInput();
 
-        if(Input.GetMouseButton(0))
+        m_playerUI.UpdateHealthBar(PlayerStats.s_health);
+    }
+
+    void CheckForInput()
+    {
+        if (Input.GetMouseButton(0))
         {
             m_weapon.Attack();
-        }
-
-        if(PlayerStats.s_health <= 0)
-        {
-            GameplayManager.LoadScene("GameoverScene");
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -124,7 +131,10 @@ public class PlayerController : MonoBehaviour
             GameplayManager.LoadScene("MenuScene");
         }
 
-        m_playerUI.UpdateHealthBar(PlayerStats.s_health);
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            m_haxMode = !(m_haxMode);
+        }
     }
 
     /// <summary>
